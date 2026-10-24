@@ -1,0 +1,19 @@
+/.venv/
+/.cache/
+/runs/
+/validation-output/
+*.egg-info/
+build/
+dist/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.DS_Store
+*.tmp
+
+# Retain figures; numerical example outputs stay local.
+/examples/*/results/**
+!/examples/*/results/**/
+!/examples/*/results/**/figures/*.png
+!/examples/*/results/**/figures/*.svg
+!/examples/*/results/**/figures/*.pdf

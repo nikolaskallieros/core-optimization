@@ -1,0 +1,17 @@
+name: core-optimization
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.12
+  - openmc=0.16.0=nodagmc_nompi*
+  - njoy2016=2016.78
+  - pytorch=2.7.1
+  - numpy=2.2
+  - scipy=1.15
+  - h5py>=3.11
+  - matplotlib>=3.9
+  - pandas>=2.2
+  - lxml>=5
+  - uncertainties>=3.2
+  - pip>=25

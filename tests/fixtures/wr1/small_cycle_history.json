@@ -1,0 +1,2085 @@
+{
+  "format": "wr1-native-state-1",
+  "array_file": "small_cycle_history.npz",
+  "array_sha256": "684459d9d71c54fe628b2d6649cc7ae7d1254a071f20f4c0a54b57a00457a0fb",
+  "state": {
+    "design": {
+      "pitch_mm": [
+        239.60599349120335
+      ],
+      "element_radius_mm": [
+        36.206364792259166,
+        36.04407730649218
+      ],
+      "enrichment": [
+        0.03173310654196001,
+        0.037746188113245004
+      ],
+      "cycle_days": [
+        130.9889170706964
+      ]
+    },
+    "cycles": [
+      {
+        "cycle": 1,
+        "bol": "fresh",
+        "cycle_days": 130.9889170706964,
+        "segments": [
+          {
+            "start": "fresh",
+            "mid": "cycle1/s0_mid",
+            "end": "cycle1/s0_end",
+            "end_key": "step/0",
+            "time_days": 1.637361463383705,
+            "duration_days": 1.637361463383705,
+            "reload_rings": [],
+            "burnup_MWd_tHM": [
+              29.100970611813462,
+              47.59158023003779,
+              25.91335804070105,
+              27.095683304255655,
+              45.60615742019004,
+              25.500002163901453,
+              26.459561164050307,
+              46.41514377350384,
+              24.767030093868648
+            ],
+            "fuel_ids_before_loading": [
+              "cycle1/center/axial/2",
+              "cycle1/center/axial/1",
+              "cycle1/center/axial/0",
+              "cycle1/outer_lower/axial/2",
+              "cycle1/outer_lower/axial/1",
+              "cycle1/outer_lower/axial/0",
+              "cycle1/outer_upper/axial/2",
+              "cycle1/outer_upper/axial/1",
+              "cycle1/outer_upper/axial/0"
+            ]
+          },
+          {
+            "start": "cycle1/s0_end",
+            "mid": "cycle1/s1_mid",
+            "end": "cycle1/s1_end",
+            "end_key": "step/1",
+            "time_days": 16.37361463383705,
+            "duration_days": 14.736253170453345,
+            "reload_rings": [],
+            "burnup_MWd_tHM": [
+              260.43145637523025,
+              482.26223865626054,
+              253.3080040238474,
+              261.8033791747461,
+              467.9336243775697,
+              251.5228200525185,
+              262.96772293361886,
+              475.2795897106937,
+              249.03828984933529
+            ],
+            "fuel_ids_before_loading": [
+              "cycle1/center/axial/2",
+              "cycle1/center/axial/1",
+              "cycle1/center/axial/0",
+              "cycle1/outer_lower/axial/2",
+              "cycle1/outer_lower/axial/1",
+              "cycle1/outer_lower/axial/0",
+              "cycle1/outer_upper/axial/2",
+              "cycle1/outer_upper/axial/1",
+              "cycle1/outer_upper/axial/0"
+            ]
+          },
+          {
+            "start": "cycle1/s1_end",
+            "mid": "cycle1/s2_mid",
+            "end": "cycle1/s2_end",
+            "end_key": "step/2",
+            "time_days": 49.12084390151115,
+            "duration_days": 32.7472292676741,
+            "reload_rings": [],
+            "burnup_MWd_tHM": [
+              782.5924982547078,
+              1443.0560519107328,
+              756.6247348756433,
+              764.1371205540818,
+              1410.8744329572646,
+              781.4327746456049,
+              763.458355000509,
+              1417.158031148556,
+              770.5034292208335
+            ],
+            "fuel_ids_before_loading": [
+              "cycle1/center/axial/2",
+              "cycle1/center/axial/1",
+              "cycle1/center/axial/0",
+              "cycle1/outer_lower/axial/2",
+              "cycle1/outer_lower/axial/1",
+              "cycle1/outer_lower/axial/0",
+              "cycle1/outer_upper/axial/2",
+              "cycle1/outer_upper/axial/1",
+              "cycle1/outer_upper/axial/0"
+            ]
+          },
+          {
+            "start": "cycle1/s2_end",
+            "mid": "cycle1/s3_mid",
+            "end": "cycle1/s3_end",
+            "end_key": "step/3",
+            "time_days": 90.05488048610377,
+            "duration_days": 40.93403658459262,
+            "reload_rings": [],
+            "burnup_MWd_tHM": [
+              1445.192091949706,
+              2602.9617683972474,
+              1435.7948694018023,
+              1415.7115485157894,
+              2577.523536415471,
+              1410.0207329870277,
+              1420.435950121203,
+              2577.4039902949485,
+              1423.9064039363238
+            ],
+            "fuel_ids_before_loading": [
+              "cycle1/center/axial/2",
+              "cycle1/center/axial/1",
+              "cycle1/center/axial/0",
+              "cycle1/outer_lower/axial/2",
+              "cycle1/outer_lower/axial/1",
+              "cycle1/outer_lower/axial/0",
+              "cycle1/outer_upper/axial/2",
+              "cycle1/outer_upper/axial/1",
+              "cycle1/outer_upper/axial/0"
+            ]
+          },
+          {
+            "start": "cycle1/s3_end",
+            "mid": "cycle1/s4_mid",
+            "end": "cycle1/s4_end",
+            "end_key": "step/4",
+            "time_days": 130.9889170706964,
+            "duration_days": 40.93403658459263,
+            "reload_rings": [],
+            "burnup_MWd_tHM": [
+              2132.08530877543,
+              3784.052804970837,
+              2076.627090156379,
+              2119.248646057254,
+              3743.3515856511926,
+              2040.0886229449839,
+              2095.95076536449,
+              3717.6130420061536,
+              2023.7856708340832
+            ],
+            "fuel_ids_before_loading": [
+              "cycle1/center/axial/2",
+              "cycle1/center/axial/1",
+              "cycle1/center/axial/0",
+              "cycle1/outer_lower/axial/2",
+              "cycle1/outer_lower/axial/1",
+              "cycle1/outer_lower/axial/0",
+              "cycle1/outer_upper/axial/2",
+              "cycle1/outer_upper/axial/1",
+              "cycle1/outer_upper/axial/0"
+            ]
+          }
+        ],
+        "discharges": [
+          {
+            "time_days": 130.9889170706964,
+            "rings": [
+              0,
+              1
+            ],
+            "ids": [
+              "cycle1/center/axial/2",
+              "cycle1/outer_lower/axial/2",
+              "cycle1/outer_upper/axial/2"
+            ],
+            "burnup_MWd_tHM": [
+              2132.08530877543,
+              2119.248646057254,
+              2095.95076536449
+            ]
+          }
+        ],
+        "metrics": {
+          "loss": -0.42220829787539466,
+          "discharge_burnup_MWd_tHM": 2111.124701409382,
+          "power_variance": 0.00016642406481743357,
+          "rms_keff_deficit": 0.0,
+          "channel_power_variance": 0.00016642406481743357,
+          "assembly_power_variance": 0.08974549553230615,
+          "peak_burnup_MWd_tHM": 3784.052804970837
+        },
+        "energy_balance_relative": 2.6062578748718054e-16,
+        "end_state": {
+          "inventory": {
+            "array": "root/cycles/0/end_state/inventory"
+          },
+          "energy_j": [
+            583237157242.4515,
+            1035136911146.4463,
+            568066425733.7375,
+            1723605205490.3604,
+            3044503669266.3203,
+            1659223601115.203,
+            1704656816157.3533,
+            3023570265396.573,
+            1645964254140.7522
+          ],
+          "initial_hm_kg": [
+            3.166116305427597,
+            3.166116305427597,
+            3.166116305427597,
+            9.413305210749748,
+            9.413305210749748,
+            9.413305210749748,
+            9.413305210749748,
+            9.413305210749748,
+            9.413305210749748
+          ],
+          "ids": [
+            "cycle1/center/axial/2",
+            "cycle1/center/axial/1",
+            "cycle1/center/axial/0",
+            "cycle1/outer_lower/axial/2",
+            "cycle1/outer_lower/axial/1",
+            "cycle1/outer_lower/axial/0",
+            "cycle1/outer_upper/axial/2",
+            "cycle1/outer_upper/axial/1",
+            "cycle1/outer_upper/axial/0"
+          ]
+        }
+      },
+      {
+        "cycle": 2,
+        "bol": "cycle2/bol",
+        "cycle_days": 130.9889170706964,
+        "segments": [
+          {
+            "start": "cycle2/bol",
+            "mid": "cycle2/s0_mid",
+            "end": "cycle2/s0_end",
+            "end_key": "step/0",
+            "time_days": 1.637361463383705,
+            "duration_days": 1.637361463383705,
+            "reload_rings": [],
+            "burnup_MWd_tHM": [
+              3804.851732200922,
+              2125.766136810104,
+              31.15855605663996,
+              3762.4716700624986,
+              2087.7162715119716,
+              31.652282506209175,
+              3736.706569106714,
+              2070.5973729676953,
+              32.046004967034044
+            ],
+            "fuel_ids_before_loading": [
+              "cycle1/center/axial/1",
+              "cycle1/center/axial/0",
+              "center/cycle2/BOL",
+              "cycle1/outer_lower/axial/1",
+              "cycle1/outer_lower/axial/0",
+              "outer_lower/cycle2/BOL",
+              "cycle1/outer_upper/axial/1",
+              "cycle1/outer_upper/axial/0",
+              "outer_upper/cycle2/BOL"
+            ]
+          },
+          {
+            "start": "cycle2/s0_end",
+            "mid": "cycle2/s1_mid",
+            "end": "cycle2/s1_end",
+            "end_key": "step/1",
+            "time_days": 16.37361463383705,
+            "duration_days": 14.736253170453345,
+            "reload_rings": [],
+            "burnup_MWd_tHM": [
+              4001.6107935264968,
+              2559.5863324530746,
+              302.7957778517902,
+              3952.7734767923353,
+              2508.66371723981,
+              291.6860425948379,
+              3931.0156202014073,
+              2505.8982926239228,
+              300.88807706452747
+            ],
+            "fuel_ids_before_loading": [
+              "cycle1/center/axial/1",
+              "cycle1/center/axial/0",
+              "center/cycle2/BOL",
+              "cycle1/outer_lower/axial/1",
+              "cycle1/outer_lower/axial/0",
+              "outer_lower/cycle2/BOL",
+              "cycle1/outer_upper/axial/1",
+              "cycle1/outer_upper/axial/0",
+              "outer_upper/cycle2/BOL"
+            ]
+          },
+          {
+            "start": "cycle2/s1_end",
+            "mid": "cycle2/s2_mid",
+            "end": "cycle2/s2_end",
+            "end_key": "step/2",
+            "time_days": 49.12084390151115,
+            "duration_days": 32.7472292676741,
+            "reload_rings": [],
+            "burnup_MWd_tHM": [
+              4483.401022193649,
+              3503.6838868065497,
+              856.4563860007503,
+              4428.103828953894,
+              3455.402668712216,
+              841.8949061676482,
+              4405.309798635679,
+              3437.5768022695493,
+              863.9172508555749
+            ],
+            "fuel_ids_before_loading": [
+              "cycle1/center/axial/1",
+              "cycle1/center/axial/0",
+              "center/cycle2/BOL",
+              "cycle1/outer_lower/axial/1",
+              "cycle1/outer_lower/axial/0",
+              "outer_lower/cycle2/BOL",
+              "cycle1/outer_upper/axial/1",
+              "cycle1/outer_upper/axial/0",
+              "outer_upper/cycle2/BOL"
+            ]
+          },
+          {
+            "start": "cycle2/s2_end",
+            "mid": "cycle2/s3_mid",
+            "end": "cycle2/s3_end",
+            "end_key": "step/3",
+            "time_days": 90.05488048610377,
+            "duration_days": 40.93403658459262,
+            "reload_rings": [],
+            "burnup_MWd_tHM": [
+              5054.341565662056,
+              4714.589934494867,
+              1595.7958506268455,
+              4992.167568980055,
+              4604.269585617672,
+              1571.4695119443736,
+              4978.532810826117,
+              4610.378125156043,
+              1586.2633791368899
+            ],
+            "fuel_ids_before_loading": [
+              "cycle1/center/axial/1",
+              "cycle1/center/axial/0",
+              "center/cycle2/BOL",
+              "cycle1/outer_lower/axial/1",
+              "cycle1/outer_lower/axial/0",
+              "outer_lower/cycle2/BOL",
+              "cycle1/outer_upper/axial/1",
+              "cycle1/outer_upper/axial/0",
+              "outer_upper/cycle2/BOL"
+            ]
+          },
+          {
+            "start": "cycle2/s3_end",
+            "mid": "cycle2/s4_mid",
+            "end": "cycle2/s4_end",
+            "end_key": "step/4",
+            "time_days": 130.9889170706964,
+            "duration_days": 40.93403658459263,
+            "reload_rings": [],
+            "burnup_MWd_tHM": [
+              5613.785739152595,
+              5916.098441781422,
+              2310.664779657867,
+              5567.020064468724,
+              5771.139352618639,
+              2285.408614291131,
+              5554.401494950483,
+              5785.888184013329,
+              2305.3570931203153
+            ],
+            "fuel_ids_before_loading": [
+              "cycle1/center/axial/1",
+              "cycle1/center/axial/0",
+              "center/cycle2/BOL",
+              "cycle1/outer_lower/axial/1",
+              "cycle1/outer_lower/axial/0",
+              "outer_lower/cycle2/BOL",
+              "cycle1/outer_upper/axial/1",
+              "cycle1/outer_upper/axial/0",
+              "outer_upper/cycle2/BOL"
+            ]
+          }
+        ],
+        "discharges": [
+          {
+            "time_days": 130.9889170706964,
+            "rings": [
+              0,
+              1
+            ],
+            "ids": [
+              "cycle1/center/axial/1",
+              "cycle1/outer_lower/axial/1",
+              "cycle1/outer_upper/axial/1"
+            ],
+            "burnup_MWd_tHM": [
+              5613.785739152595,
+              5567.020064468724,
+              5554.401494950483
+            ]
+          }
+        ],
+        "metrics": {
+          "loss": -1.113659433105511,
+          "discharge_burnup_MWd_tHM": 5568.3515555255735,
+          "power_variance": 0.00010877999603727582,
+          "rms_keff_deficit": 0.0,
+          "channel_power_variance": 0.00010877999603727582,
+          "assembly_power_variance": 0.09829554621783393,
+          "peak_burnup_MWd_tHM": 5916.098441781422
+        },
+        "energy_balance_relative": 5.212515749743611e-16,
+        "end_state": {
+          "inventory": {
+            "array": "root/cycles/1/end_state/inventory"
+          },
+          "energy_j": [
+            1535664835921.6467,
+            1618363216025.766,
+            632088008805.7762,
+            4527710695976.702,
+            4693722866493.232,
+            1858744697840.561,
+            4517447892625.172,
+            4705718232215.929,
+            1874968986583.4453
+          ],
+          "initial_hm_kg": [
+            3.166116305427597,
+            3.166116305427597,
+            3.1661163054275976,
+            9.413305210749748,
+            9.413305210749748,
+            9.413305210749757,
+            9.413305210749748,
+            9.413305210749748,
+            9.413305210749765
+          ],
+          "ids": [
+            "cycle1/center/axial/1",
+            "cycle1/center/axial/0",
+            "center/cycle2/BOL",
+            "cycle1/outer_lower/axial/1",
+            "cycle1/outer_lower/axial/0",
+            "outer_lower/cycle2/BOL",
+            "cycle1/outer_upper/axial/1",
+            "cycle1/outer_upper/axial/0",
+            "outer_upper/cycle2/BOL"
+          ]
+        },
+        "repeatability_to_previous": {
+          "previous_cycle": 1,
+          "cycle": 2,
+          "inventory_relative_rms": 0.3998176672157485,
+          "inventory_max_relative": 0.9923204840007349,
+          "inventory_floor_atoms_cm3": 100000000000000.0,
+          "burnup_relative_rms": 1.0001716363375912,
+          "assembly_power_history_relative_rms": 0.14548189256550914,
+          "keff_history_max_absolute_change": 0.03241599519661076,
+          "scope": "Position-resolved EOL inventory/burnup and equal-phase power/keff repeatability; includes Monte Carlo noise. No convergence claim from cycle count alone."
+        }
+      },
+      {
+        "cycle": 3,
+        "bol": "cycle3/bol",
+        "cycle_days": 130.9889170706964,
+        "segments": [
+          {
+            "start": "cycle3/bol",
+            "mid": "cycle3/s0_mid",
+            "end": "cycle3/s0_end",
+            "end_key": "step/0",
+            "time_days": 1.637361463383705,
+            "duration_days": 1.637361463383705,
+            "reload_rings": [],
+            "burnup_MWd_tHM": [
+              5936.666251510357,
+              2360.50226259708,
+              28.530465208050547,
+              5791.793162173063,
+              2333.696885539634,
+              30.78266867938669,
+              5805.636188517339,
+              2353.5890773379538,
+              29.37327594032597
+            ],
+            "fuel_ids_before_loading": [
+              "cycle1/center/axial/0",
+              "center/cycle2/BOL",
+              "center/cycle3/BOL",
+              "cycle1/outer_lower/axial/0",
+              "outer_lower/cycle2/BOL",
+              "outer_lower/cycle3/BOL",
+              "cycle1/outer_upper/axial/0",
+              "outer_upper/cycle2/BOL",
+              "outer_upper/cycle3/BOL"
+            ]
+          },
+          {
+            "start": "cycle3/s0_end",
+            "mid": "cycle3/s1_mid",
+            "end": "cycle3/s1_end",
+            "end_key": "step/1",
+            "time_days": 16.37361463383705,
+            "duration_days": 14.736253170453345,
+            "reload_rings": [],
+            "burnup_MWd_tHM": [
+              6118.171423576452,
+              2800.2137343371423,
+              310.81609102901524,
+              5974.022044325042,
+              2758.6350825816876,
+              304.89528028699715,
+              5994.470725591089,
+              2779.1390820637835,
+              303.01162965660217
+            ],
+            "fuel_ids_before_loading": [
+              "cycle1/center/axial/0",
+              "center/cycle2/BOL",
+              "center/cycle3/BOL",
+              "cycle1/outer_lower/axial/0",
+              "outer_lower/cycle2/BOL",
+              "outer_lower/cycle3/BOL",
+              "cycle1/outer_upper/axial/0",
+              "outer_upper/cycle2/BOL",
+              "outer_upper/cycle3/BOL"
+            ]
+          },
+          {
+            "start": "cycle3/s1_end",
+            "mid": "cycle3/s2_mid",
+            "end": "cycle3/s2_end",
+            "end_key": "step/2",
+            "time_days": 49.12084390151115,
+            "duration_days": 32.7472292676741,
+            "reload_rings": [],
+            "burnup_MWd_tHM": [
+              6504.227869352864,
+              3718.708596920436,
+              1020.7557124961733,
+              6353.250286270829,
+              3667.115812066039,
+              967.2868922626834,
+              6383.952347663494,
+              3702.9284695135543,
+              969.1673244557608
+            ],
+            "fuel_ids_before_loading": [
+              "cycle1/center/axial/0",
+              "center/cycle2/BOL",
+              "center/cycle3/BOL",
+              "cycle1/outer_lower/axial/0",
+              "outer_lower/cycle2/BOL",
+              "outer_lower/cycle3/BOL",
+              "cycle1/outer_upper/axial/0",
+              "outer_upper/cycle2/BOL",
+              "outer_upper/cycle3/BOL"
+            ]
+          },
+          {
+            "start": "cycle3/s2_end",
+            "mid": "cycle3/s3_mid",
+            "end": "cycle3/s3_end",
+            "end_key": "step/3",
+            "time_days": 90.05488048610377,
+            "duration_days": 40.93403658459262,
+            "reload_rings": [],
+            "burnup_MWd_tHM": [
+              7008.161897967821,
+              4974.550361124236,
+              1812.5143045883078,
+              6854.333800797111,
+              4857.9195259677535,
+              1717.2742568419594,
+              6888.027102105093,
+              4908.707714297794,
+              1718.106955446862
+            ],
+            "fuel_ids_before_loading": [
+              "cycle1/center/axial/0",
+              "center/cycle2/BOL",
+              "center/cycle3/BOL",
+              "cycle1/outer_lower/axial/0",
+              "outer_lower/cycle2/BOL",
+              "outer_lower/cycle3/BOL",
+              "cycle1/outer_upper/axial/0",
+              "outer_upper/cycle2/BOL",
+              "outer_upper/cycle3/BOL"
+            ]
+          },
+          {
+            "start": "cycle3/s3_end",
+            "mid": "cycle3/s4_mid",
+            "end": "cycle3/s4_end",
+            "end_key": "step/4",
+            "time_days": 130.9889170706964,
+            "duration_days": 40.93403658459263,
+            "reload_rings": [],
+            "burnup_MWd_tHM": [
+              7523.7676710567175,
+              6133.335033159907,
+              2634.789314213548,
+              7370.935674361709,
+              5998.6703224667945,
+              2502.5219226788327,
+              7419.427803930996,
+              6047.359632233833,
+              2524.5771026237035
+            ],
+            "fuel_ids_before_loading": [
+              "cycle1/center/axial/0",
+              "center/cycle2/BOL",
+              "center/cycle3/BOL",
+              "cycle1/outer_lower/axial/0",
+              "outer_lower/cycle2/BOL",
+              "outer_lower/cycle3/BOL",
+              "cycle1/outer_upper/axial/0",
+              "outer_upper/cycle2/BOL",
+              "outer_upper/cycle3/BOL"
+            ]
+          }
+        ],
+        "discharges": [
+          {
+            "time_days": 130.9889170706964,
+            "rings": [
+              0,
+              1
+            ],
+            "ids": [
+              "cycle1/center/axial/0",
+              "cycle1/outer_lower/axial/0",
+              "cycle1/outer_upper/axial/0"
+            ],
+            "burnup_MWd_tHM": [
+              7523.7676710567175,
+              7370.935674361709,
+              7419.427803930996
+            ]
+          }
+        ],
+        "metrics": {
+          "loss": -1.4827187330848945,
+          "discharge_burnup_MWd_tHM": 7413.693223453187,
+          "power_variance": 0.00019911605742884263,
+          "rms_keff_deficit": 0.0,
+          "channel_power_variance": 0.00019911605742884263,
+          "assembly_power_variance": 0.11107186695065163,
+          "peak_burnup_MWd_tHM": 7523.7676710567175
+        },
+        "energy_balance_relative": 1.3031289374359027e-16,
+        "end_state": {
+          "inventory": {
+            "array": "root/cycles/2/end_state/inventory"
+          },
+          "energy_j": [
+            2058145070536.6582,
+            1677788817563.9143,
+            720753068946.0596,
+            5994852525351.672,
+            4878775981789.626,
+            2035325029371.9685,
+            6034291638410.177,
+            4918375463390.022,
+            2053262718293.8105
+          ],
+          "initial_hm_kg": [
+            3.166116305427597,
+            3.1661163054275976,
+            3.1661163054275976,
+            9.413305210749748,
+            9.413305210749757,
+            9.413305210749757,
+            9.413305210749748,
+            9.413305210749765,
+            9.413305210749765
+          ],
+          "ids": [
+            "cycle1/center/axial/0",
+            "center/cycle2/BOL",
+            "center/cycle3/BOL",
+            "cycle1/outer_lower/axial/0",
+            "outer_lower/cycle2/BOL",
+            "outer_lower/cycle3/BOL",
+            "cycle1/outer_upper/axial/0",
+            "outer_upper/cycle2/BOL",
+            "outer_upper/cycle3/BOL"
+          ]
+        },
+        "repeatability_to_previous": {
+          "previous_cycle": 2,
+          "cycle": 3,
+          "inventory_relative_rms": 0.1720552554000385,
+          "inventory_max_relative": 0.7730360380811598,
+          "inventory_floor_atoms_cm3": 100000000000000.0,
+          "burnup_relative_rms": 0.20444768979158826,
+          "assembly_power_history_relative_rms": 0.09101556379601793,
+          "keff_history_max_absolute_change": 0.009821316278933567,
+          "scope": "Position-resolved EOL inventory/burnup and equal-phase power/keff repeatability; includes Monte Carlo noise. No convergence claim from cycle count alone."
+        }
+      }
+    ],
+    "initialization": [
+      {
+        "design": {
+          "pitch_mm": [
+            239.60599349120335
+          ],
+          "element_radius_mm": [
+            36.206364792259166,
+            36.04407730649218
+          ],
+          "enrichment": [
+            0.03173310654196001,
+            0.037746188113245004
+          ],
+          "cycle_days": [
+            130.9889170706964
+          ]
+        },
+        "initial_keff": [
+          1.0962599246361118,
+          0.0034934121357152468
+        ],
+        "cycle_days": 130.9889170706964
+      }
+    ],
+    "timing": {
+      "native_s": 3198.520413783379,
+      "depletion_s": 92.83830037154257
+    },
+    "observations": {
+      "fresh": {
+        "keff": [
+          1.0962599246361118,
+          0.0034934121357152468
+        ],
+        "power_W": [
+          51773.404255546484,
+          94007.12679978274,
+          48092.06638047538,
+          148576.08011386896,
+          274213.2759892716,
+          141575.95684150892,
+          147649.44316510137,
+          275788.8948679682,
+          142648.07591080046
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/fresh/group_flux_cm2_s"
+        },
+        "native_wall_s": 27.281047717202455,
+        "fission_power_relative_error": 5.876551010316428e-16,
+        "power_relative_se_rms": 0.018879589738675484,
+        "power_relative_se_max": 0.030101544311267787,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 4.3386437159169216e-16,
+            "absorption": 6.652569250726177e-16,
+            "fission": 8.866345471885054e-16,
+            "nu_fission": 5.458003844001852e-16,
+            "kappa_fission": 4.614739518901977e-16,
+            "scatter": 9.047144173299469e-16,
+            "nu_scatter": 9.047144173299469e-16,
+            "scatter_p1": 9.481467342156457e-16
+          },
+          "diffusion_depletion_fission_relative_error": 0.0,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle1/s0_mid": {
+        "keff": [
+          1.0790825642863553,
+          0.0036617128207505345
+        ],
+        "power_W": [
+          56271.6661032349,
+          92026.39828593384,
+          50107.87615063119,
+          155774.97244235745,
+          262192.9786954705,
+          146601.29031467973,
+          152117.86190752557,
+          266843.89764365245,
+          142387.38278083855
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle1/s0_mid/group_flux_cm2_s"
+        },
+        "native_wall_s": 82.2822443866171,
+        "fission_power_relative_error": 2.442034387167221e-15,
+        "power_relative_se_rms": 0.02147874084266162,
+        "power_relative_se_max": 0.030020030130749924,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 9.723071694312182e-16,
+            "absorption": 3.2488626881681274e-16,
+            "fission": 7.7616647487437e-16,
+            "nu_fission": 9.100853148698392e-16,
+            "kappa_fission": 9.233767550708176e-16,
+            "scatter": 6.521828673405644e-16,
+            "nu_scatter": 6.521828673405644e-16,
+            "scatter_p1": 1.1231903706765152e-15
+          },
+          "diffusion_depletion_fission_relative_error": 0.0,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle1/s0_end": {
+        "keff": [
+          1.0719298077618722,
+          0.0035953968182242013
+        ],
+        "power_W": [
+          52583.72472365519,
+          90294.2195103072,
+          48994.560043554804,
+          153799.76403154514,
+          266013.50961989304,
+          141622.37250273817,
+          152565.53211055495,
+          276806.7377086214,
+          141643.90407345432
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle1/s0_end/group_flux_cm2_s"
+        },
+        "native_wall_s": 82.27824212703854,
+        "fission_power_relative_error": 6.56444039214103e-15,
+        "power_relative_se_rms": 0.018311253429482675,
+        "power_relative_se_max": 0.02408490810120377,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 1.0775281580344404e-15,
+            "absorption": 4.817537711657307e-16,
+            "fission": 8.880111781400184e-16,
+            "nu_fission": 9.110416337582744e-16,
+            "kappa_fission": 7.703122369747464e-16,
+            "scatter": 6.477526869006589e-16,
+            "nu_scatter": 6.477526869006589e-16,
+            "scatter_p1": 5.478909718188063e-16
+          },
+          "diffusion_depletion_fission_relative_error": 0.0,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle1/s1_mid": {
+        "keff": [
+          1.0629673886929139,
+          0.0034625093293679183
+        ],
+        "power_W": [
+          49701.86209792896,
+          93389.9440526425,
+          48856.23829113591,
+          149927.87861236138,
+          269776.67249390384,
+          144380.10427543477,
+          151077.9901660602,
+          273952.4000402103,
+          143261.2342946465
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle1/s1_mid/group_flux_cm2_s"
+        },
+        "native_wall_s": 90.53538752160966,
+        "fission_power_relative_error": 2.854645027122412e-14,
+        "power_relative_se_rms": 0.020610038691834972,
+        "power_relative_se_max": 0.028687076896930716,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 4.30847614187651e-16,
+            "absorption": 7.999272950157349e-16,
+            "fission": 5.551145449162777e-16,
+            "nu_fission": 9.108638110952546e-16,
+            "kappa_fission": 7.704131433694053e-16,
+            "scatter": 5.199090101531808e-16,
+            "nu_scatter": 5.199090101531808e-16,
+            "scatter_p1": 4.1172038573372805e-16
+          },
+          "diffusion_depletion_fission_relative_error": 4.892890091520959e-20,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle1/s1_end": {
+        "keff": [
+          1.0604779947826528,
+          0.003292333149155234
+        ],
+        "power_W": [
+          52033.57166175427,
+          91727.12463145381,
+          50043.764078597036,
+          154498.77481253952,
+          272412.36506471946,
+          140079.39834817732,
+          150363.89414172177,
+          272488.7339585138,
+          140676.69762684754
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle1/s1_end/group_flux_cm2_s"
+        },
+        "native_wall_s": 93.96062448807061,
+        "fission_power_relative_error": 2.1291157485076082e-15,
+        "power_relative_se_rms": 0.01894086383708813,
+        "power_relative_se_max": 0.026444740076601442,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 8.617005051897643e-16,
+            "absorption": 9.582708213526804e-16,
+            "fission": 8.889765204356413e-16,
+            "nu_fission": 5.467462810310907e-16,
+            "kappa_fission": 4.626251781630557e-16,
+            "scatter": 3.917763423034305e-16,
+            "nu_scatter": 5.22368456404574e-16,
+            "scatter_p1": 5.464935646988003e-16
+          },
+          "diffusion_depletion_fission_relative_error": 3.054932630246682e-21,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle1/s2_mid": {
+        "keff": [
+          1.0597288080707261,
+          0.003500756722698125
+        ],
+        "power_W": [
+          50484.35014884233,
+          92892.89586712574,
+          48662.41645418963,
+          144397.58510895754,
+          271051.62254425633,
+          152324.46372870047,
+          143867.7769119645,
+          270746.2414058949,
+          149896.97215439298
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle1/s2_mid/group_flux_cm2_s"
+        },
+        "native_wall_s": 96.82901755068451,
+        "fission_power_relative_error": 1.2375556734557767e-14,
+        "power_relative_se_rms": 0.0209611957233184,
+        "power_relative_se_max": 0.030449349823267944,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 1.0752972476500232e-15,
+            "absorption": 9.564368701342055e-16,
+            "fission": 9.988745371984764e-16,
+            "nu_fission": 9.09161260245115e-16,
+            "kappa_fission": 7.699659335384838e-16,
+            "scatter": 5.204405378723056e-16,
+            "nu_scatter": 5.204405378723056e-16,
+            "scatter_p1": 6.891122200201918e-16
+          },
+          "diffusion_depletion_fission_relative_error": 0.0,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle1/s2_end": {
+        "keff": [
+          1.0532243841133355,
+          0.0032998096479974707
+        ],
+        "power_W": [
+          51550.68880237806,
+          93887.21256337974,
+          47565.50387376293,
+          155553.49136960288,
+          276541.05667991086,
+          133666.30863568862,
+          155565.1562976917,
+          273644.8410102796,
+          136350.06509163004
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle1/s2_end/group_flux_cm2_s"
+        },
+        "native_wall_s": 98.13484801305458,
+        "fission_power_relative_error": 9.483960756026045e-15,
+        "power_relative_se_rms": 0.01935156209663627,
+        "power_relative_se_max": 0.028994746396397937,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 1.075453311263616e-15,
+            "absorption": 6.3595743254655665e-16,
+            "fission": 6.714376045382117e-16,
+            "nu_fission": 5.493941305168343e-16,
+            "kappa_fission": 4.657241308104451e-16,
+            "scatter": 6.484132308707398e-16,
+            "nu_scatter": 6.484132308707398e-16,
+            "scatter_p1": 6.75718444682965e-16
+          },
+          "diffusion_depletion_fission_relative_error": 0.0,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle1/s3_mid": {
+        "keff": [
+          1.0464430067497221,
+          0.0033411781244500243
+        ],
+        "power_W": [
+          51249.95120459392,
+          89714.98313237223,
+          52531.629335869155,
+          149837.8725794132,
+          268285.88140836405,
+          144551.83992035195,
+          151080.39996776718,
+          266813.39648518746,
+          150258.37029040523
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle1/s3_mid/group_flux_cm2_s"
+        },
+        "native_wall_s": 97.30198919400573,
+        "fission_power_relative_error": 7.769419027571642e-15,
+        "power_relative_se_rms": 0.02136474782183467,
+        "power_relative_se_max": 0.02859125206091357,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 6.99027381121476e-16,
+            "absorption": 1.1135674870621113e-15,
+            "fission": 5.583615080897506e-16,
+            "nu_fission": 5.475518845172531e-16,
+            "kappa_fission": 4.646552348128157e-16,
+            "scatter": 5.187944461837548e-16,
+            "nu_scatter": 5.187944461837548e-16,
+            "scatter_p1": 6.790614630110068e-16
+          },
+          "diffusion_depletion_fission_relative_error": 4.8940395896838193e-20,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle1/s3_end": {
+        "keff": [
+          1.0529178945865012,
+          0.0035653588153179553
+        ],
+        "power_W": [
+          47224.96812458516,
+          97256.60479025167,
+          54631.72631132096,
+          137231.1809594511,
+          273667.6153154423,
+          154628.2409139123,
+          131795.14085629987,
+          273171.43990434444,
+          154717.40714871656
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle1/s3_end/group_flux_cm2_s"
+        },
+        "native_wall_s": 98.10282938415185,
+        "fission_power_relative_error": 1.3470402977879545e-14,
+        "power_relative_se_rms": 0.020990829107079834,
+        "power_relative_se_max": 0.031076561347976837,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 1.2882355092762657e-15,
+            "absorption": 1.1105664921066742e-15,
+            "fission": 6.732259361853822e-16,
+            "nu_fission": 7.325430951825669e-16,
+            "kappa_fission": 7.779419945719198e-16,
+            "scatter": 3.8628717843758345e-16,
+            "nu_scatter": 3.8628717843758345e-16,
+            "scatter_p1": 1.0593491671776374e-15
+          },
+          "diffusion_depletion_fission_relative_error": 0.0,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle1/s4_mid": {
+        "keff": [
+          1.0380519665348438,
+          0.0032469074295071064
+        ],
+        "power_W": [
+          53128.98495571572,
+          91353.59962270476,
+          49566.31479481624,
+          161787.35299062936,
+          268097.0694895873,
+          144892.16912215622,
+          155343.2708041728,
+          262205.65337201586,
+          137949.9091725262
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle1/s4_mid/group_flux_cm2_s"
+        },
+        "native_wall_s": 108.08776035392657,
+        "fission_power_relative_error": 6.0257528972352256e-15,
+        "power_relative_se_rms": 0.01945768008843892,
+        "power_relative_se_max": 0.02803431747332148,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 1.50288121248684e-15,
+            "absorption": 9.523109325082877e-16,
+            "fission": 5.605310355617228e-16,
+            "nu_fission": 9.137703682354505e-16,
+            "kappa_fission": 4.662650737573986e-16,
+            "scatter": 7.80600060191167e-16,
+            "nu_scatter": 7.80600060191167e-16,
+            "scatter_p1": 8.276974617129928e-16
+          },
+          "diffusion_depletion_fission_relative_error": 1.562789499417415e-18,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle1/s4_end": {
+        "keff": [
+          1.0340025969667148,
+          0.003051269422207944
+        ],
+        "power_W": [
+          51868.48893683019,
+          90905.23410381234,
+          53545.14220152396,
+          146191.4188099907,
+          275245.7808726545,
+          139977.3002252854,
+          151656.67436546853,
+          271746.6096614995,
+          143187.67514725914
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle1/s4_end/group_flux_cm2_s"
+        },
+        "native_wall_s": 102.40020548412576,
+        "fission_power_relative_error": 5.330527166035212e-15,
+        "power_relative_se_rms": 0.018498430483426975,
+        "power_relative_se_max": 0.0246697419959378,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 1.0763204359259433e-15,
+            "absorption": 7.992903103033382e-16,
+            "fission": 4.529819910265229e-16,
+            "nu_fission": 7.376057546392057e-16,
+            "kappa_fission": 9.41832853437676e-16,
+            "scatter": 6.477906811573389e-16,
+            "nu_scatter": 6.477906811573389e-16,
+            "scatter_p1": 4.051073925339299e-16
+          },
+          "diffusion_depletion_fission_relative_error": 2.506184347761213e-17,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle2/bol": {
+        "keff": [
+          1.063843929439501,
+          0.003101161872382561
+        ],
+        "power_W": [
+          39362.315734910895,
+          90344.53030124158,
+          65047.57716124742,
+          114327.465030019,
+          270127.78431004833,
+          179649.66841855014,
+          112331.62314779898,
+          269207.26855462964,
+          183926.09166587816
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle2/bol/group_flux_cm2_s"
+        },
+        "native_wall_s": 99.4098202958703,
+        "fission_power_relative_error": 4.187855033126876e-15,
+        "power_relative_se_rms": 0.021175232336576765,
+        "power_relative_se_max": 0.03367021252833517,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 1.0740002907267309e-15,
+            "absorption": 6.362214983726016e-16,
+            "fission": 4.445729994897071e-16,
+            "nu_fission": 9.12244000947867e-16,
+            "kappa_fission": 4.627811077870875e-16,
+            "scatter": 5.152498561467394e-16,
+            "nu_scatter": 5.152498561467394e-16,
+            "scatter_p1": 9.647465535979317e-16
+          },
+          "diffusion_depletion_fission_relative_error": 4.8963209950804034e-20,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle2/s0_mid": {
+        "keff": [
+          1.0486843375589519,
+          0.003548630984999712
+        ],
+        "power_W": [
+          40218.25608530517,
+          95018.68727385988,
+          60250.35680309599,
+          109922.69834357273,
+          273814.6722379034,
+          181971.17894303275,
+          109770.01851250645,
+          269123.7393041828,
+          184234.71682086523
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle2/s0_mid/group_flux_cm2_s"
+        },
+        "native_wall_s": 101.1625035670586,
+        "fission_power_relative_error": 4.594437887704903e-15,
+        "power_relative_se_rms": 0.020001526074796095,
+        "power_relative_se_max": 0.03214212887369314,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 1.0714235562174326e-15,
+            "absorption": 6.329137431356853e-16,
+            "fission": 8.909359535653687e-16,
+            "nu_fission": 7.312586622398801e-16,
+            "kappa_fission": 9.274243152075191e-16,
+            "scatter": 6.455212668000066e-16,
+            "nu_scatter": 6.455212668000066e-16,
+            "scatter_p1": 6.792660777648876e-16
+          },
+          "diffusion_depletion_fission_relative_error": 3.1181047212058247e-18,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle2/s0_end": {
+        "keff": [
+          1.0441066803219081,
+          0.0037451756783508467
+        ],
+        "power_W": [
+          47172.69527167341,
+          94969.98152221841,
+          55327.120123041925,
+          131626.22886800437,
+          277015.7573812693,
+          158184.24213074968,
+          131021.88742054463,
+          274481.1416978593,
+          154525.26990896298
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle2/s0_end/group_flux_cm2_s"
+        },
+        "native_wall_s": 101.99201899813488,
+        "fission_power_relative_error": 6.5887383022537844e-15,
+        "power_relative_se_rms": 0.020116304651074363,
+        "power_relative_se_max": 0.03089367832155616,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 1.2902069786577041e-15,
+            "absorption": 6.356815976472154e-16,
+            "fission": 5.578515876473806e-16,
+            "nu_fission": 7.325777046632102e-16,
+            "kappa_fission": 7.742618649326129e-16,
+            "scatter": 5.182789959415992e-16,
+            "nu_scatter": 5.182789959415992e-16,
+            "scatter_p1": 1.0919643481962221e-15
+          },
+          "diffusion_depletion_fission_relative_error": 4.904484747781177e-20,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle2/s1_mid": {
+        "keff": [
+          1.0436571537537744,
+          0.002950324893780195
+        ],
+        "power_W": [
+          42274.115753697115,
+          93207.22025887566,
+          58361.852713760076,
+          121562.03942646751,
+          268895.13490896113,
+          166105.80182763224,
+          124121.80911989928,
+          278063.92628079874,
+          171732.4240342326
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle2/s1_mid/group_flux_cm2_s"
+        },
+        "native_wall_s": 102.01719620684162,
+        "fission_power_relative_error": 3.353616287362792e-14,
+        "power_relative_se_rms": 0.02181514764507159,
+        "power_relative_se_max": 0.0313886136140172,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 8.61727308115898e-16,
+            "absorption": 7.9992366926651715e-16,
+            "fission": 5.576880187034251e-16,
+            "nu_fission": 7.320449546168329e-16,
+            "kappa_fission": 7.739805648163035e-16,
+            "scatter": 1.0389234688237444e-15,
+            "nu_scatter": 1.0389234688237444e-15,
+            "scatter_p1": 4.0374468014865046e-16
+          },
+          "diffusion_depletion_fission_relative_error": 7.823494078744668e-19,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle2/s1_end": {
+        "keff": [
+          1.0355253233862132,
+          0.0038563823200916717
+        ],
+        "power_W": [
+          44305.863546381464,
+          92378.41044107848,
+          57180.25233938879,
+          128565.09695725655,
+          264812.96678639075,
+          172727.3183060441,
+          125746.85537998141,
+          265998.2628771128,
+          172609.29769068988
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle2/s1_end/group_flux_cm2_s"
+        },
+        "native_wall_s": 101.26409766590223,
+        "fission_power_relative_error": 4.0503361412401715e-15,
+        "power_relative_se_rms": 0.019712094858370784,
+        "power_relative_se_max": 0.029930321828785706,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 1.718009890489953e-15,
+            "absorption": 6.394381867300643e-16,
+            "fission": 1.0060800453673133e-15,
+            "nu_fission": 7.332343095106597e-16,
+            "kappa_fission": 9.307593737481173e-16,
+            "scatter": 1.1599436138141865e-15,
+            "nu_scatter": 1.1599436138141865e-15,
+            "scatter_p1": 5.43610052107238e-16
+          },
+          "diffusion_depletion_fission_relative_error": 0.0,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle2/s2_mid": {
+        "keff": [
+          1.0430365973417013,
+          0.003082299522435703
+        ],
+        "power_W": [
+          46581.1591664807,
+          91278.64334169848,
+          53529.83804537572,
+          136635.366743738,
+          272143.4119591984,
+          158159.4558774865,
+          136337.5149936982,
+          267814.2354549694,
+          161844.69874167885
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle2/s2_mid/group_flux_cm2_s"
+        },
+        "native_wall_s": 100.28467543516308,
+        "fission_power_relative_error": 5.550193517243237e-15,
+        "power_relative_se_rms": 0.01756937628916793,
+        "power_relative_se_max": 0.025739445336556144,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 1.2901620829349918e-15,
+            "absorption": 6.366718054462885e-16,
+            "fission": 5.630541665630806e-16,
+            "nu_fission": 3.6882625136223953e-16,
+            "kappa_fission": 7.811821039885859e-16,
+            "scatter": 8.981054974634617e-16,
+            "nu_scatter": 8.981054974634617e-16,
+            "scatter_p1": 9.37374249643607e-16
+          },
+          "diffusion_depletion_fission_relative_error": 1.1428300991792665e-21,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle2/s2_end": {
+        "keff": [
+          1.032615999538382,
+          0.003992060825339217
+        ],
+        "power_W": [
+          44514.36750805224,
+          93265.51735029728,
+          59467.94169667101,
+          125955.10268613427,
+          267885.9710544635,
+          171200.52701206956,
+          122621.94719114517,
+          263701.0928627235,
+          175711.85696276772
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle2/s2_end/group_flux_cm2_s"
+        },
+        "native_wall_s": 100.87299734633416,
+        "fission_power_relative_error": 1.0522179462868526e-14,
+        "power_relative_se_rms": 0.018725403020232168,
+        "power_relative_se_max": 0.030290193415202633,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 1.1799885295183607e-15,
+            "absorption": 3.172081399536645e-16,
+            "fission": 4.44248503917275e-16,
+            "nu_fission": 5.45022405101415e-16,
+            "kappa_fission": 4.621799636131444e-16,
+            "scatter": 6.421999910379115e-16,
+            "nu_scatter": 7.064199901417025e-16,
+            "scatter_p1": 6.906004168804172e-16
+          },
+          "diffusion_depletion_fission_relative_error": 4.877469778808787e-20,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle2/s3_mid": {
+        "keff": [
+          1.0346663901083915,
+          0.0034597026973205093
+        ],
+        "power_W": [
+          44160.41795363562,
+          93659.69500720872,
+          57185.53383713616,
+          129713.67072999103,
+          264196.64019733417,
+          167775.01099839548,
+          131819.9625004715,
+          269700.66294554033,
+          166112.73015461132
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle2/s3_mid/group_flux_cm2_s"
+        },
+        "native_wall_s": 100.89829601021484,
+        "fission_power_relative_error": 1.491836838146913e-14,
+        "power_relative_se_rms": 0.019066602284607815,
+        "power_relative_se_max": 0.027313199315996302,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 1.0746043937315014e-15,
+            "absorption": 8.014846746508547e-16,
+            "fission": 7.923686743866622e-16,
+            "nu_fission": 3.697711405040984e-16,
+            "kappa_fission": 7.849049749455231e-16,
+            "scatter": 7.7536183221266e-16,
+            "nu_scatter": 7.7536183221266e-16,
+            "scatter_p1": 8.138022621950972e-16
+          },
+          "diffusion_depletion_fission_relative_error": 0.0,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle2/s3_end": {
+        "keff": [
+          1.0240202481887901,
+          0.003216519218068254
+        ],
+        "power_W": [
+          42357.68997106436,
+          90462.1202529265,
+          57182.5723829525,
+          128809.07555601491,
+          264677.4951689009,
+          169810.3116100013,
+          124877.35157282422,
+          269933.0687433911,
+          176214.6390662485
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle2/s3_end/group_flux_cm2_s"
+        },
+        "native_wall_s": 101.63432688033208,
+        "fission_power_relative_error": 2.4175756512608152e-15,
+        "power_relative_se_rms": 0.018740112694120712,
+        "power_relative_se_max": 0.02663151734846575,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 1.0724628988744112e-15,
+            "absorption": 4.779663998520401e-16,
+            "fission": 5.640927737996135e-16,
+            "nu_fission": 1.1039685675466421e-15,
+            "kappa_fission": 7.821012584565571e-16,
+            "scatter": 5.135270756497409e-16,
+            "nu_scatter": 5.135270756497409e-16,
+            "scatter_p1": 6.825146713713495e-16
+          },
+          "diffusion_depletion_fission_relative_error": 1.2484806985514167e-17,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle2/s4_mid": {
+        "keff": [
+          1.022507625225544,
+          0.003816094578923142
+        ],
+        "power_W": [
+          43271.210646534484,
+          92932.8254292367,
+          55292.81647489899,
+          132194.68302407145,
+          268336.6258120487,
+          164179.42702499827,
+          132428.36859670613,
+          270323.571423567,
+          165364.79589226277
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle2/s4_mid/group_flux_cm2_s"
+        },
+        "native_wall_s": 100.65862572891638,
+        "fission_power_relative_error": 3.552918228937286e-15,
+        "power_relative_se_rms": 0.019170608637721204,
+        "power_relative_se_max": 0.02894594714264987,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 1.0738477370917125e-15,
+            "absorption": 7.995659513831366e-16,
+            "fission": 5.672802649803254e-16,
+            "nu_fission": 9.23951548062615e-16,
+            "kappa_fission": 4.718112061428466e-16,
+            "scatter": 7.722193769813912e-16,
+            "nu_scatter": 7.722193769813912e-16,
+            "scatter_p1": 8.132099210816461e-16
+          },
+          "diffusion_depletion_fission_relative_error": 0.0,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle2/s4_end": {
+        "keff": [
+          1.0133855762219548,
+          0.003135068146166232
+        ],
+        "power_W": [
+          48513.63817570647,
+          91329.63659294206,
+          56113.8985720942,
+          139537.32130022527,
+          266484.84875097644,
+          158747.22684956243,
+          137967.02505266765,
+          266556.37268049974,
+          159074.35634965004
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle2/s4_end/group_flux_cm2_s"
+        },
+        "native_wall_s": 101.03359212120995,
+        "fission_power_relative_error": 4.9398497681461075e-15,
+        "power_relative_se_rms": 0.01933064104740171,
+        "power_relative_se_max": 0.026240007166820494,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 6.454130859459135e-16,
+            "absorption": 7.980506390503726e-16,
+            "fission": 7.945873568728348e-16,
+            "nu_fission": 3.692415726497462e-16,
+            "kappa_fission": 4.719368706274903e-16,
+            "scatter": 7.782726840303943e-16,
+            "nu_scatter": 7.782726840303943e-16,
+            "scatter_p1": 6.842098659649482e-16
+          },
+          "diffusion_depletion_fission_relative_error": 6.096023100574949e-21,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle3/bol": {
+        "keff": [
+          1.0557074778487652,
+          0.003707482587766931
+        ],
+        "power_W": [
+          29556.13421352371,
+          95004.96250630882,
+          72891.85814827941,
+          92825.17094651205,
+          268402.9579180948,
+          201401.5194569361,
+          96300.9423235303,
+          265865.639767676,
+          202075.13904346284
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle3/bol/group_flux_cm2_s"
+        },
+        "native_wall_s": 98.58089852984995,
+        "fission_power_relative_error": 5.2544731359191734e-15,
+        "power_relative_se_rms": 0.019550620669398836,
+        "power_relative_se_max": 0.03351508021581584,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 8.59450051950496e-16,
+            "absorption": 6.360640361330783e-16,
+            "fission": 7.79393495024768e-16,
+            "nu_fission": 5.483248286992361e-16,
+            "kappa_fission": 6.181444910424248e-16,
+            "scatter": 3.8910928865630695e-16,
+            "nu_scatter": 3.8910928865630695e-16,
+            "scatter_p1": 6.9565856815323975e-16
+          },
+          "diffusion_depletion_fission_relative_error": 4.995742064833992e-17,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle3/s0_mid": {
+        "keff": [
+          1.0464572877348683,
+          0.003365294926745193
+        ],
+        "power_W": [
+          39771.35116832501,
+          96369.23238026329,
+          55168.4970708726,
+          118740.19112352862,
+          277612.6380929178,
+          176971.70842266802,
+          113532.65473547568,
+          277289.04002811515,
+          168869.01130215818
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle3/s0_mid/group_flux_cm2_s"
+        },
+        "native_wall_s": 99.56393347214907,
+        "fission_power_relative_error": 5.247922971240187e-15,
+        "power_relative_se_rms": 0.018218072084650403,
+        "power_relative_se_max": 0.02786644764845148,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 1.1798385148138978e-15,
+            "absorption": 1.4304309601497866e-15,
+            "fission": 8.9524271529662e-16,
+            "nu_fission": 5.510948441544504e-16,
+            "kappa_fission": 4.659536874625036e-16,
+            "scatter": 6.450551405894643e-16,
+            "nu_scatter": 6.450551405894643e-16,
+            "scatter_p1": 6.792144696663333e-16
+          },
+          "diffusion_depletion_fission_relative_error": 0.0,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle3/s0_end": {
+        "keff": [
+          1.0428243256828411,
+          0.0036737661605360738
+        ],
+        "power_W": [
+          40597.4619120941,
+          96528.15435973088,
+          61189.29850795032,
+          112834.77739494425,
+          280166.20373341814,
+          168658.16663134986,
+          114080.80881233736,
+          276039.14878675365,
+          174230.3041857458
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle3/s0_end/group_flux_cm2_s"
+        },
+        "native_wall_s": 100.1740852179937,
+        "fission_power_relative_error": 6.5368897717890644e-15,
+        "power_relative_se_rms": 0.019177034010442757,
+        "power_relative_se_max": 0.03133253034659288,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 1.2919670452992344e-15,
+            "absorption": 6.372704199863755e-16,
+            "fission": 7.7801110992107505e-16,
+            "nu_fission": 7.297825256167204e-16,
+            "kappa_fission": 4.627839816689059e-16,
+            "scatter": 7.762649981485326e-16,
+            "nu_scatter": 7.762649981485326e-16,
+            "scatter_p1": 6.911266216309848e-16
+          },
+          "diffusion_depletion_fission_relative_error": 2.452974758117732e-20,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle3/s1_mid": {
+        "keff": [
+          1.0409622181013545,
+          0.0029428334737410847
+        ],
+        "power_W": [
+          38996.78419953658,
+          94472.9738459664,
+          60649.68566715354,
+          116405.1720656989,
+          271444.36908038764,
+          175099.16837963523,
+          120624.76880961188,
+          271835.1829725659,
+          174796.21930376807
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle3/s1_mid/group_flux_cm2_s"
+        },
+        "native_wall_s": 101.81280269101262,
+        "fission_power_relative_error": 1.2654113020990724e-14,
+        "power_relative_se_rms": 0.01956693098549679,
+        "power_relative_se_max": 0.02966383560954002,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 1.2894304848241724e-15,
+            "absorption": 4.763835365779047e-16,
+            "fission": 5.584286993845396e-16,
+            "nu_fission": 4.581208498660641e-16,
+            "kappa_fission": 6.200035504458281e-16,
+            "scatter": 7.619677851318353e-16,
+            "nu_scatter": 7.619677851318353e-16,
+            "scatter_p1": 6.936515557094327e-16
+          },
+          "diffusion_depletion_fission_relative_error": 1.2505708456942581e-17,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle3/s1_end": {
+        "keff": [
+          1.0400137105821017,
+          0.003253833266726851
+        ],
+        "power_W": [
+          41160.162512548595,
+          91083.25060486609,
+          61561.606847468334,
+          117408.27775947611,
+          267695.450108304,
+          179958.21285894376,
+          119618.16920788918,
+          268655.8546860552,
+          177183.33973877298
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle3/s1_end/group_flux_cm2_s"
+        },
+        "native_wall_s": 100.94406298082322,
+        "fission_power_relative_error": 8.89490204248158e-15,
+        "power_relative_se_rms": 0.018893050102354498,
+        "power_relative_se_max": 0.02836123557555702,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 6.447664133129506e-16,
+            "absorption": 7.941261763809917e-16,
+            "fission": 3.3507374908953205e-16,
+            "nu_fission": 5.49447819381261e-16,
+            "kappa_fission": 6.19975057082842e-16,
+            "scatter": 1.290750395011208e-15,
+            "nu_scatter": 1.290750395011208e-15,
+            "scatter_p1": 6.836252831087615e-16
+          },
+          "diffusion_depletion_fission_relative_error": 6.083528273606136e-21,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle3/s2_mid": {
+        "keff": [
+          1.0332152810627677,
+          0.0031464133888171367
+        ],
+        "power_W": [
+          37325.28324143426,
+          88803.28583240142,
+          68639.43795132302,
+          109010.48014757068,
+          261145.9526795007,
+          190406.7779780908,
+          111957.8500085368,
+          265546.47977807064,
+          191488.77670739603
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle3/s2_mid/group_flux_cm2_s"
+        },
+        "native_wall_s": 100.74503004783764,
+        "fission_power_relative_error": 1.024100434505294e-14,
+        "power_relative_se_rms": 0.02038701008808178,
+        "power_relative_se_max": 0.030292672953081225,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 1.0752513762820714e-15,
+            "absorption": 4.777460007310659e-16,
+            "fission": 5.608685499702432e-16,
+            "nu_fission": 7.347593839457806e-16,
+            "kappa_fission": 4.668868986662848e-16,
+            "scatter": 1.1593422715038716e-15,
+            "nu_scatter": 1.1593422715038716e-15,
+            "scatter_p1": 9.350205270241601e-16
+          },
+          "diffusion_depletion_fission_relative_error": 4.9916214208279e-17,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle3/s2_end": {
+        "keff": [
+          1.0277015292224942,
+          0.0036585861994911793
+        ],
+        "power_W": [
+          43011.42037166338,
+          90982.43373123606,
+          61073.73741119488,
+          125719.94251348342,
+          268719.40193582815,
+          172385.52388697388,
+          125329.25325015257,
+          268188.4640100746,
+          168914.14721371746
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle3/s2_end/group_flux_cm2_s"
+        },
+        "native_wall_s": 101.03128528315574,
+        "fission_power_relative_error": 6.5843660315515806e-15,
+        "power_relative_se_rms": 0.01984208963794214,
+        "power_relative_se_max": 0.02788845747284613,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 8.588665453216129e-16,
+            "absorption": 7.943441155738022e-16,
+            "fission": 1.0098489412626922e-15,
+            "nu_fission": 3.669267442171779e-16,
+            "kappa_fission": 7.781739554855116e-16,
+            "scatter": 6.458342897971273e-16,
+            "nu_scatter": 6.458342897971273e-16,
+            "scatter_p1": 6.78144307277642e-16
+          },
+          "diffusion_depletion_fission_relative_error": 2.4357142032672967e-20,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle3/s3_mid": {
+        "keff": [
+          1.0285871394481605,
+          0.0033186695434388514
+        ],
+        "power_W": [
+          38977.679163412235,
+          97135.32840734336,
+          61239.98504776957,
+          115230.56243337714,
+          273840.5429888715,
+          172469.18594018838,
+          115918.43630634023,
+          277284.3578347128,
+          172228.24620230895
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle3/s3_mid/group_flux_cm2_s"
+        },
+        "native_wall_s": 101.81242123665288,
+        "fission_power_relative_error": 1.0631124097785723e-14,
+        "power_relative_se_rms": 0.021068743834163815,
+        "power_relative_se_max": 0.032898225263932095,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 8.600382773248187e-16,
+            "absorption": 6.388405219388338e-16,
+            "fission": 6.754016223168065e-16,
+            "nu_fission": 9.18867488780993e-16,
+            "kappa_fission": 7.804875507048394e-16,
+            "scatter": 5.163137340398135e-16,
+            "nu_scatter": 5.163137340398135e-16,
+            "scatter_p1": 9.55738802100214e-16
+          },
+          "diffusion_depletion_fission_relative_error": 1.9032510239811356e-22,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle3/s3_end": {
+        "keff": [
+          1.0274148848662947,
+          0.003198095398442002
+        ],
+        "power_W": [
+          40205.17245289043,
+          91859.74161653903,
+          58980.07194989265,
+          114684.50515537338,
+          277372.3367259428,
+          174743.72393403752,
+          112931.2831421347,
+          275884.8513951111,
+          177662.63795240276
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle3/s3_end/group_flux_cm2_s"
+        },
+        "native_wall_s": 101.37668898422271,
+        "fission_power_relative_error": 3.577526507437626e-15,
+        "power_relative_se_rms": 0.020889602060415915,
+        "power_relative_se_max": 0.031170628796903216,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 1.0710017973875127e-15,
+            "absorption": 6.355454795022611e-16,
+            "fission": 6.743862491605409e-16,
+            "nu_fission": 5.496809314320439e-16,
+            "kappa_fission": 6.233021851276043e-16,
+            "scatter": 6.402935932357265e-16,
+            "nu_scatter": 6.402935932357265e-16,
+            "scatter_p1": 6.810006437557523e-16
+          },
+          "diffusion_depletion_fission_relative_error": 3.9820482534860524e-16,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle3/s4_mid": {
+        "keff": [
+          1.016666381327905,
+          0.0036215971159555918
+        ],
+        "power_W": [
+          39880.45112472025,
+          89628.2739433678,
+          63600.331966772625,
+          118799.20755577514,
+          262330.2345142568,
+          180577.74315210214,
+          122202.38737404805,
+          261847.57054650944,
+          185458.12414677208
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle3/s4_mid/group_flux_cm2_s"
+        },
+        "native_wall_s": 101.19547055615112,
+        "fission_power_relative_error": 3.6093759903185454e-15,
+        "power_relative_se_rms": 0.019650822777313098,
+        "power_relative_se_max": 0.031970909119358015,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 8.590501859903644e-16,
+            "absorption": 4.761235512760897e-16,
+            "fission": 6.762468407670463e-16,
+            "nu_fission": 7.338113953743731e-16,
+            "kappa_fission": 4.686500246514732e-16,
+            "scatter": 7.725927793528581e-16,
+            "nu_scatter": 7.725927793528581e-16,
+            "scatter_p1": 5.539118741259754e-16
+          },
+          "diffusion_depletion_fission_relative_error": 7.791480477430004e-19,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      },
+      "cycle3/s4_end": {
+        "keff": [
+          1.0161030980070893,
+          0.003366382708932521
+        ],
+        "power_W": [
+          41119.81413503565,
+          92876.79868666279,
+          58608.12057226468,
+          119033.27007192819,
+          274294.61685370136,
+          169361.8127091639,
+          119429.50482393758,
+          273161.6711269578,
+          176438.71534467238
+        ],
+        "group_flux_cm2_s": {
+          "array": "root/observations/cycle3/s4_end/group_flux_cm2_s"
+        },
+        "native_wall_s": 102.86138830706477,
+        "fission_power_relative_error": 6.598059932567402e-15,
+        "power_relative_se_rms": 0.019725983121726402,
+        "power_relative_se_max": 0.02703065898020625,
+        "physical_inventory_checks": {
+          "status": "checked",
+          "macro_reconstruction_relative_errors": {
+            "total_tracklength": 8.592578901708666e-16,
+            "absorption": 1.2713600852849608e-15,
+            "fission": 4.537312446426817e-16,
+            "nu_fission": 7.374803081931213e-16,
+            "kappa_fission": 4.715551324882721e-16,
+            "scatter": 6.441308243995143e-16,
+            "nu_scatter": 6.441308243995143e-16,
+            "scatter_p1": 6.832762731397806e-16
+          },
+          "diffusion_depletion_fission_relative_error": 3.7155266905168332e-25,
+          "tolerance": 1e-09,
+          "scope": "All fuel-region absorption, fission and scattering tables reconstruct from isotope densities. This checks data consistency, not Monte Carlo convergence."
+        }
+      }
+    }
+  }
+}

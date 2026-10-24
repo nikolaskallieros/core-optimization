@@ -1,0 +1,23 @@
+{
+  "layouts": [
+    "ring_material_axial"
+  ],
+  "pooled_iterations": 150,
+  "selected_layout": "ring_material_axial",
+  "coupled_iterations": 0,
+  "coupled_max_evaluations": 4,
+  "log_factor_bound": 2.302585092994046,
+  "log_factor_regularization": 0.0001,
+  "inventory_floor_atoms_cm3": 100000000000000.0,
+  "inventory_relative_scale": 0.05,
+  "reaction_relative_scale": 0.05,
+  "reaction_scale_policy": "Use the larger of the 5% floor and the group-response-weighted native flux-tally scales, summed without assuming independent groups. This is a fitting weight, not a full rate covariance or confidence bound.",
+  "maximum_family_scaled_rms": 2.0,
+  "maximum_inventory_relative_rms": 0.05,
+  "maximum_stage_inventory_relative_rms": 0.08,
+  "allow_exploratory_fit": true,
+  "basis_selection_relative_loss_allowance": 0.05,
+  "selection_policy": "Fit the already selected compact 18-coefficient ring/material/axial basis from scratch. The user permits modest field mismatch for workflow development; retain strict residual checks separately.",
+  "coupled_fit_policy": "Fit shared coefficients against all native states, then validate their connected depletion trajectory without further coefficient updates.",
+  "scope": "Fit physical diffusion/Bateman evolution across all three cycles from fresh insertion to discharge. Reconstruct macroscopic material data from live isotope densities and measured microscopic cross sections. One correction vector is shared by every time, with no state-by-state anchoring or fitted reaction/decay coefficients. Within-group spectra are native state data, frozen locally during differentiation."
+}

@@ -1,0 +1,656 @@
+# WR-1 STUDY — start here when changing a calculation
+#
+# 1. Shared geometry, operation and goals are under [defaults.cycle].
+# 2. The six labeled scenario sections below contain only their differences.
+# 3. Select a scenario with prepare_step_N.py or STEP in run_optimization.py.
+#    Preparation writes the resolved input and OpenMC model under runs/.
+#
+# Numbers keep their original precision so the retained cases are reproducible.
+# Arrays follow ring order 0, 1, 2, 3 unless a nearby comment says otherwise.
+# A { "$ref" = "..." } value reuses the named setting after scenario overrides.
+# Change the original value to update every dependent setting.
+
+schema_version = 1
+
+# ---------------------------------------------------------------------------
+# Files loaded with this study
+# ---------------------------------------------------------------------------
+
+[data]
+model = "model.toml"
+neutron_sources = "nuclear_data/neutron_sources.json"
+depletion_sources = "nuclear_data/depletion_sources.json"
+
+# ---------------------------------------------------------------------------
+# SHARED PHYSICS AND OPERATING CONDITIONS
+# ---------------------------------------------------------------------------
+
+[defaults.cycle]
+# Number of fuel assemblies stacked in each channel.
+axial_positions = 3
+# Height of one assembly [mm]; active height = count × height.
+assembly_height_mm = 990.0
+# Center-to-flat distance of the outer moderator hexagon [cm].
+apothem_cm = 140.05283525425475
+symmetry_boundary_type = "periodic"
+outer_radial_boundary = "vacuum"
+axial_boundaries = ["vacuum", "vacuum"]
+# Power in the modeled one-sixth core [W]; full-core power is 35 MW.
+power_W = 5833333.333333333
+# Number of irradiation/refuelling cycles carried through the calculation.
+cycles = 3
+# All cycles participate in derivatives of the discharge objective.
+differentiated_cycles = [1, 2, 3]
+# Evaluate the objective at the end of this cycle.
+objective_cycle = 3
+initial_inventory = "fresh"
+# Depletion interval boundaries as fractions of one cycle.
+step_fractions = [0.0, 0.0125, 0.125, 0.375, 0.6875, 1.0]
+boron_control = false
+# Initial B-10 concentration [mg per kg of unborated moderator].
+initial_boron_mg_B10_per_kg = 0.0
+physical_inventory_response = true
+# Energy bins used to collapse continuous-energy depletion rates.
+depletion_flux_groups = 256
+# Passive outer-ring pitch [mm]; it is not an optimization variable.
+fixed_outer_pitch_mm = [234.95]
+scope = "Three-cycle WR-1 fuel residence with synchronized loading and fixed boron."
+
+# ---------------------------------------------------------------------------
+# Surrogate resolution — refining this changes runtime and spatial accuracy
+# ---------------------------------------------------------------------------
+
+[defaults.cycle.diffusion_mesh]
+triangular_subdivisions = 16
+axial_subdivisions_per_assembly = 2
+
+# ---------------------------------------------------------------------------
+# Fuel movement — one fresh assembly enters each channel at every cycle boundary
+# ---------------------------------------------------------------------------
+
+[defaults.cycle.refueling]
+rings = [0, 1, 2, 3]
+cycle_days_bounds = { "$ref" = "#/settings/optimization/bounds/cycle_days" }
+
+# ---------------------------------------------------------------------------
+# OpenMC histories — exploratory precision used for the retained calculations
+# ---------------------------------------------------------------------------
+
+[defaults.cycle.sampling]
+# Neutron histories per batch.
+particles = 1_000
+batches = 160
+# Source-convergence batches excluded from tally statistics.
+inactive = 80
+seed = 20_301
+threads = 2
+
+# ---------------------------------------------------------------------------
+# Maximum allowed Monte Carlo statistical uncertainties
+# ---------------------------------------------------------------------------
+
+[defaults.cycle.sampling_checks]
+maximum_keff_standard_error = 0.005
+maximum_power_relative_se_rms = 0.035
+maximum_power_relative_se = 0.07
+
+# ---------------------------------------------------------------------------
+# Starting-loading search limits
+# ---------------------------------------------------------------------------
+
+[defaults.cycle.initialization]
+maximum_enrichment = 0.05
+bol_target_keff = 1.02
+maximum_attempts = 3
+
+# ---------------------------------------------------------------------------
+# Shared physics goals — scenario-specific objective weights appear below
+# ---------------------------------------------------------------------------
+
+[defaults.cycle.objective]
+# Burnup normalization [MWd per tonne of initial heavy metal].
+reference_discharge_burnup_MWd_tHM = 5000.0
+# Minimum multiplication factor; acceptance and surrogate targets refer here.
+minimum_keff = 1.002
+# Scale for a subcriticality penalty; this is not a statistical uncertainty.
+keff_deficit_scale = 0.002
+
+# ---------------------------------------------------------------------------
+# Record of the exploratory sampling allowance
+# ---------------------------------------------------------------------------
+
+[defaults.cycle.sampling_allowance]
+individual_power_se_limit = { "$ref" = "#/settings/cycle/sampling_checks/maximum_power_relative_se" }
+basis = "Exploratory sampling; the statistical checks do not establish model accuracy."
+
+# ---------------------------------------------------------------------------
+# ADVANCED: fitting the diffusion surrogate to OpenMC observations
+# ---------------------------------------------------------------------------
+
+[defaults.calibration]
+layouts = ["ring_material_axial"]
+pooled_iterations = 150
+selected_layout = "ring_material_axial"
+coupled_iterations = 0
+coupled_max_evaluations = 4
+log_factor_bound = 2.302585092994046
+log_factor_regularization = 0.0001
+inventory_floor_atoms_cm3 = 100000000000000.0
+inventory_relative_scale = 0.05
+reaction_relative_scale = 0.05
+maximum_family_scaled_rms = 2.0
+maximum_inventory_relative_rms = 0.05
+maximum_stage_inventory_relative_rms = 0.08
+allow_exploratory_fit = true
+basis_selection_relative_loss_allowance = 0.05
+selection_policy = "Shared ring/material/axial basis; retain field and trajectory residuals."
+scope = """\
+    Fit native fields and the connected depletion trajectory with one shared spatial correction vector."""
+
+# ---------------------------------------------------------------------------
+# ADVANCED: search settings shared by all scenarios
+# ---------------------------------------------------------------------------
+
+[defaults.optimization]
+surrogate_keff_target = { "$ref" = "#/settings/cycle/objective/minimum_keff" }
+surrogate_keff_penalty_scale = { "$ref" = "#/settings/cycle/objective/keff_deficit_scale" }
+surrogate_burnup_penalty_scale_MWd_tHM = 100.0
+# Number of standard errors subtracted before checking native criticality.
+native_keff_standard_errors = 0.0
+native_minimum_keff = { "$ref" = "#/settings/cycle/objective/minimum_keff" }
+native_stall_batches = 2
+surrogate_keff_policy = "anchor_corrected_soft"
+surrogate_keff_error_scale_floor = 1e-12
+surrogate_keff_soft_weight = 0.05
+surrogate_keff_large_deficit_scale = 0.5
+scope = { "$ref" = "#/settings/optimization/objective" }
+native_acceptance = "Declared geometry, bounds, sampling, criticality and scenario-specific limits."
+
+# ---------------------------------------------------------------------------
+# Adam step sizes for each design parameter, in that parameter's units
+# ---------------------------------------------------------------------------
+
+[defaults.optimization.learning_rates]
+pitch_mm = 2.0
+element_radius_mm = 1.0
+enrichment = 0.001
+
+# ---------------------------------------------------------------------------
+# Hard design bounds — every pair is [minimum, maximum]
+# ---------------------------------------------------------------------------
+
+[defaults.optimization.bounds]
+pitch_mm = [150.0, 350.0]
+element_radius_mm = [25.0, 60.0]
+enrichment = [0.007, 0.05]
+# Allowed common refuelling period [days]; shared with the cycle calculation.
+cycle_days = [20.0, 400.0]
+
+# ---------------------------------------------------------------------------
+# Maximum local change before another native transport evaluation
+# ---------------------------------------------------------------------------
+
+[defaults.optimization.trust_half_width]
+pitch_mm = 15.0
+element_radius_mm = 5.0
+enrichment = 0.006
+
+# ---------------------------------------------------------------------------
+# Trial-step acceptance and backtracking
+# ---------------------------------------------------------------------------
+
+[defaults.optimization.step_control]
+method = "backtracking"
+maximum_backtracks = 4
+minimum_fraction = 0.01
+
+# ---------------------------------------------------------------------------
+# SCENARIO 1 — Discharge burnup with radial channel-power balance
+# ---------------------------------------------------------------------------
+
+[scenarios."1".cycle.design]
+# Pitch increments from ring 0 to 1, 1 to 2, and 2 to 3 [mm].
+pitch_mm = [234.95, 234.95, 234.95]
+# Homogenized element radius [mm], by fuel ring 0–3.
+element_radius_mm = [41.275, 41.275, 41.275, 41.275]
+# U-235 mass fraction of uranium, by ring; 0.024 means 2.4%.
+enrichment = [0.024, 0.024, 0.024, 0.024]
+# Starting common refuelling period [days].
+cycle_days = [80.0]
+
+[scenarios."1".cycle.objective]
+power_basis = "channel"
+channel_power_weight = 0.1
+
+[scenarios."1".optimization]
+objective = """\
+    Maximize mean discharge burnup after three cycles, with a secondary penalty on cycle-three total \
+    radial-channel power variance."""
+objective_kind = "channel_burnup"
+minimum_discharge_burnup_MWd_tHM = 5000.0
+steps_per_refresh = 3
+search_id = "wr1_channel_burnup"
+burnup_scale_MWd_tHM = 5000.0
+power_weight = 0.1
+maximum_refreshes = 7
+native_score_stall_tolerance = 0.002
+
+[scenarios."1".optimization.learning_rates]
+cycle_days = 16.0
+
+[scenarios."1".optimization.trust_half_width]
+cycle_days = 48.0
+
+# ---------------------------------------------------------------------------
+# SCENARIO 2 — Temporal channel-power balance
+# ---------------------------------------------------------------------------
+
+[scenarios."2".cycle.design]
+# Pitch increments from ring 0 to 1, 1 to 2, and 2 to 3 [mm].
+pitch_mm = [233.36698998535962, 264.2641278422627, 267.2066152628564]
+# Homogenized element radius [mm], by fuel ring 0–3.
+element_radius_mm = [25.07808522738826, 25.07808522321037, 25.078085222177226, 25.078085221925452]
+# U-235 mass fraction of uranium, by ring; 0.024 means 2.4%.
+enrichment = [0.007078085225801812, 0.03101199005557615, 0.03650365198841135, 0.05]
+# Starting common refuelling period [days].
+cycle_days = [327.6876646055817]
+
+[scenarios."2".cycle.objective]
+power_basis = "channel_temporal"
+channel_power_weight = 0.1
+temporal_variance_scale = 0.0009969233458173058
+minimum_discharge_burnup_MWd_tHM = 22457.777099850184
+burnup_penalty_scale_MWd_tHM = 100.0
+
+[scenarios."2".optimization]
+objective = """\
+    Minimize time variation of total power within each radial channel during cycle three, with EOL \
+    k-effective near 1.002 and at most 5000 MWd/tHM burnup loss from step 1 case 7."""
+objective_kind = "channel_temporal"
+checkpoint_key = "channel_temporal_eol"
+minimum_discharge_burnup_MWd_tHM = { "$ref" = "#/settings/cycle/objective/minimum_discharge_burnup_MWd_tHM" }
+steps_per_refresh = 5
+search_id = "wr1_channel_temporal_step_2"
+maximum_refreshes = 3
+native_score_stall_tolerance = 0.005
+temporal_variance_scale = { "$ref" = "#/settings/cycle/objective/temporal_variance_scale" }
+
+[scenarios."2".optimization.eol_keff]
+cycle = { "$ref" = "#/settings/cycle/objective_cycle" }
+target = { "$ref" = "#/settings/cycle/objective/minimum_keff" }
+tolerance_standard_errors = 2.0
+penalty_weight = 1.0
+
+[scenarios."2".optimization.learning_rates]
+cycle_days = 8.0
+
+[scenarios."2".optimization.trust_half_width]
+cycle_days = 40.0
+
+[scenarios."2".optimization.step_control]
+project_eol = true
+
+# ---------------------------------------------------------------------------
+# SCENARIO 3 — Beginning-of-life reactivity with burnup and power limits
+# ---------------------------------------------------------------------------
+
+[scenarios."3".cycle.design]
+# Pitch increments from ring 0 to 1, 1 to 2, and 2 to 3 [mm].
+pitch_mm = [236.8048399789391, 268.6729066766333, 274.221779928167]
+# Homogenized element radius [mm], by fuel ring 0–3.
+element_radius_mm = [26.536616062233932, 26.45109017965811, 26.031729750460862, 25.038447630842246]
+# U-235 mass fraction of uranium, by ring; 0.024 means 2.4%.
+enrichment = [0.010082403475580577, 0.02494840204231026, 0.03632377084609497, 0.04800512231823191]
+# Starting common refuelling period [days].
+cycle_days = [322.70925656695]
+
+[scenarios."3".cycle.objective]
+power_basis = "channel_temporal"
+channel_power_weight = 0.1
+temporal_variance_scale = 0.0007263041103976214
+minimum_discharge_burnup_MWd_tHM = 23462.89806435086
+burnup_penalty_scale_MWd_tHM = 100.0
+maximum_channel_temporal_rms = 0.03
+
+[scenarios."3".optimization]
+objective = """\
+    Minimize cycle-three BOL excess reactivity with BU loss <=2000 MWd/tHM, each channel's temporal \
+    power RMS <=3%, and EOL k-effective near 1.002."""
+objective_kind = "bol_reactivity"
+checkpoint_key = "bol_reactivity"
+minimum_discharge_burnup_MWd_tHM = { "$ref" = "#/settings/cycle/objective/minimum_discharge_burnup_MWd_tHM" }
+steps_per_refresh = 5
+search_id = "wr1_bol_reactivity_step_3"
+maximum_refreshes = 3
+native_score_stall_tolerance = 0.005
+temporal_variance_scale = { "$ref" = "#/settings/cycle/objective/temporal_variance_scale" }
+maximum_channel_temporal_rms = { "$ref" = "#/settings/cycle/objective/maximum_channel_temporal_rms" }
+channel_temporal_variance_penalty_scale = 0.2
+
+[scenarios."3".optimization.eol_keff]
+cycle = { "$ref" = "#/settings/cycle/objective_cycle" }
+target = { "$ref" = "#/settings/cycle/objective/minimum_keff" }
+tolerance_standard_errors = 2.0
+penalty_weight = 1.0
+
+[scenarios."3".optimization.learning_rates]
+cycle_days = 8.0
+
+[scenarios."3".optimization.trust_half_width]
+cycle_days = 40.0
+
+[scenarios."3".optimization.step_control]
+project_eol = true
+reset_projected_non_descent = true
+
+[scenarios."3".optimization.bol_reactivity]
+cycle = 3
+reference = 0.18470299221612219
+definition = "rho=(k-effective-1)/k-effective immediately after loading at cycle-three BOL"
+
+# ---------------------------------------------------------------------------
+# SCENARIO 4 — Burnup, reactivity and power balance with graphite inserts
+# ---------------------------------------------------------------------------
+
+[scenarios."4".cycle.design]
+# Pitch increments from ring 0 to 1, 1 to 2, and 2 to 3 [mm].
+pitch_mm = [237.11159509757601, 269.13194209204454, 274.92800919524984]
+# Homogenized element radius [mm], by fuel ring 0–3.
+element_radius_mm = [26.66170724765762, 26.53280345716647, 26.096879576321303, 25.067774780420738]
+# U-235 mass fraction of uranium, by ring; 0.024 means 2.4%.
+enrichment = [0.009971178621212726, 0.024952673980160073, 0.03635545831713896, 0.04805244768046571]
+# Starting common refuelling period [days].
+cycle_days = [322.2483118179331]
+# Common pitch of the separate graphite lattice [mm].
+graphite_pitch_mm = [136.89644325756706]
+# Cylinder radius [mm] for radius_group 0, 1, 2 and 3 in the site table below.
+graphite_radius_mm = [40.0, 40.0, 40.0, 40.0]
+
+[scenarios."4".cycle.objective]
+power_basis = "channel_temporal"
+channel_power_weight = 0.1
+temporal_variance_scale = 0.0005058169487109013
+minimum_discharge_burnup_MWd_tHM = 23462.89806435086
+burnup_penalty_scale_MWd_tHM = 100.0
+maximum_channel_temporal_rms = 0.03
+
+[scenarios."4".cycle.graphite]
+sites = [
+    { id = "G1_0", q = 1, r = 0, radius_group = 0 },
+    { id = "G1_1", q = 0, r = 1, radius_group = 0 },
+    { id = "G1_2", q = -1, r = 1, radius_group = 0 },
+    { id = "G1_3", q = -1, r = 0, radius_group = 0 },
+    { id = "G1_4", q = 0, r = -1, radius_group = 0 },
+    { id = "G1_5", q = 1, r = -1, radius_group = 0 },
+    { id = "G2_0", q = 2, r = 0, radius_group = 1 },
+    { id = "G2_1", q = 0, r = 2, radius_group = 1 },
+    { id = "G2_2", q = -2, r = 2, radius_group = 1 },
+    { id = "G2_3", q = -2, r = 0, radius_group = 1 },
+    { id = "G2_4", q = 0, r = -2, radius_group = 1 },
+    { id = "G2_5", q = 2, r = -2, radius_group = 1 },
+    { id = "G4_0", q = 4, r = 0, radius_group = 2 },
+    { id = "G4_1", q = 0, r = 4, radius_group = 2 },
+    { id = "G4_2", q = -4, r = 4, radius_group = 2 },
+    { id = "G4_3", q = -4, r = 0, radius_group = 2 },
+    { id = "G4_4", q = 0, r = -4, radius_group = 2 },
+    { id = "G4_5", q = 4, r = -4, radius_group = 2 },
+    { id = "G5_0", q = 5, r = 0, radius_group = 3 },
+    { id = "G5_1", q = 0, r = 5, radius_group = 3 },
+    { id = "G5_2", q = -5, r = 5, radius_group = 3 },
+    { id = "G5_3", q = -5, r = 0, radius_group = 3 },
+    { id = "G5_4", q = 0, r = -5, radius_group = 3 },
+    { id = "G5_5", q = 5, r = -5, radius_group = 3 },
+]
+rotation_deg = 30.0
+axial_extent = "full_active_height"
+density_g_cm3 = 1.7
+temperature_K = 327.15
+minimum_clearance_mm = 1.0
+material_basis = """\
+    Ideal pure natural-carbon graphite at 1.70 g/cm3, a declared modeling assumption, at the unchanged \
+    moderator temperature. No impurities or jackets are modeled. ENDF/B-VII.1 C0 uses added cold tables \
+    and bound-carbon c_Graphite S(a,b). Each cylinder replaces water over the full 2.97 m active height."""
+
+[scenarios."4".optimization]
+objective = """\
+    Improve discharge burnup, cycle-three BOL reactivity and temporal channel-power spread with graphite."""
+objective_kind = "graphite_joint"
+checkpoint_key = "graphite_joint"
+minimum_discharge_burnup_MWd_tHM = { "$ref" = "#/settings/cycle/objective/minimum_discharge_burnup_MWd_tHM" }
+steps_per_refresh = 5
+search_id = "wr1_graphite_step_4"
+maximum_refreshes = 3
+native_score_stall_tolerance = 0.005
+temporal_variance_scale = { "$ref" = "#/settings/cycle/objective/temporal_variance_scale" }
+maximum_channel_temporal_rms = { "$ref" = "#/settings/cycle/objective/maximum_channel_temporal_rms" }
+channel_temporal_variance_penalty_scale = 0.2
+
+[scenarios."4".optimization.eol_keff]
+cycle = { "$ref" = "#/settings/cycle/objective_cycle" }
+target = { "$ref" = "#/settings/cycle/objective/minimum_keff" }
+tolerance_standard_errors = 2.0
+penalty_weight = 1.0
+
+[scenarios."4".optimization.learning_rates]
+cycle_days = 8.0
+graphite_pitch_mm = 1.0
+graphite_radius_mm = 1.0
+
+[scenarios."4".optimization.bounds]
+graphite_pitch_mm = [100.0, 190.0]
+graphite_radius_mm = [5.0, 70.0]
+
+[scenarios."4".optimization.trust_half_width]
+cycle_days = 40.0
+graphite_pitch_mm = 10.0
+graphite_radius_mm = 10.0
+
+[scenarios."4".optimization.step_control]
+project_eol = true
+reset_projected_non_descent = true
+
+[scenarios."4".optimization.bol_reactivity]
+cycle = 3
+reference = 0.18318505093556492
+definition = "rho=(k-effective-1)/k-effective at post-loading cycle-three BOL"
+
+[scenarios."4".optimization.joint_objective]
+burnup_MWd_tHM = 25433.729304329856
+temporal_variance = 0.0005058169487109013
+bol_reactivity = 0.18318505093556492
+
+[scenarios."4".optimization.joint_objective.weights]
+burnup = 1.0
+bol_reactivity = 1.0
+temporal_variance = 1.0
+
+# ---------------------------------------------------------------------------
+# SCENARIO 5 — Burnup, reactivity and temporal power swing with graphite sleeves
+# ---------------------------------------------------------------------------
+
+[scenarios."5".cycle.design]
+# Pitch increments from ring 0 to 1, 1 to 2, and 2 to 3 [mm].
+pitch_mm = [237.11159509757601, 269.13194209204454, 274.92800919524984]
+# Homogenized element radius [mm], by fuel ring 0–3.
+element_radius_mm = [26.66170724765762, 26.53280345716647, 26.096879576321303, 25.067774780420738]
+# U-235 mass fraction of uranium, by ring; 0.024 means 2.4%.
+enrichment = [0.009971178621212726, 0.024952673980160073, 0.03635545831713896, 0.04805244768046571]
+# Starting common refuelling period [days].
+cycle_days = [322.2483118179331]
+# Sleeve thickness [mm]: each named row is top, middle, bottom.
+graphite_thickness_mm = [
+    10.0, 10.0, 10.0,  # B11
+    10.0, 10.0, 10.0,  # B7
+    10.0, 10.0, 10.0,  # B9
+    10.0, 10.0, 10.0,  # C10
+    10.0, 10.0, 10.0,  # C8
+    10.0, 10.0, 10.0,  # D7
+    10.0, 10.0, 10.0,  # E8
+]
+
+[scenarios."5".cycle.objective]
+power_basis = "channel_temporal"
+channel_power_weight = 0.1
+temporal_variance_scale = 0.0005058169487109013
+minimum_discharge_burnup_MWd_tHM = 23462.89806435086
+burnup_penalty_scale_MWd_tHM = 100.0
+maximum_channel_temporal_rms = 0.03
+
+[scenarios."5".cycle.graphite]
+mode = "assembly_sleeves"
+positions = ["B11", "B7", "B9", "C10", "C8", "D7", "E8"]
+density_g_cm3 = 1.7
+temperature_K = 327.15
+minimum_clearance_mm = 1.0
+material_basis = """\
+    Ideal pure natural-carbon graphite at 1.70 g/cm3 and unchanged moderator temperature, using \
+    ENDF/B-VII.1 C0 and c_Graphite S(a,b). No jackets or impurities. Each 990 mm annulus replaces only \
+    surrounding water at its fixed axial position."""
+
+[scenarios."5".optimization]
+objective = """\
+    Improve discharge burnup and cycle-three BOL reactivity; minimize the largest temporal power swing \
+    at any radial position using axial graphite sleeves."""
+objective_kind = "graphite_joint"
+checkpoint_key = "graphite_joint"
+minimum_discharge_burnup_MWd_tHM = { "$ref" = "#/settings/cycle/objective/minimum_discharge_burnup_MWd_tHM" }
+steps_per_refresh = 5
+search_id = "wr1_graphite_step_5"
+maximum_refreshes = 3
+native_score_stall_tolerance = 0.005
+temporal_variance_scale = { "$ref" = "#/settings/cycle/objective/temporal_variance_scale" }
+
+[scenarios."5".optimization.eol_keff]
+cycle = { "$ref" = "#/settings/cycle/objective_cycle" }
+target = { "$ref" = "#/settings/cycle/objective/minimum_keff" }
+tolerance_standard_errors = 2.0
+penalty_weight = 1.0
+
+[scenarios."5".optimization.learning_rates]
+cycle_days = 8.0
+graphite_thickness_mm = 1.0
+
+[scenarios."5".optimization.bounds]
+graphite_thickness_mm = [0.1, 60.0]
+
+[scenarios."5".optimization.trust_half_width]
+cycle_days = 40.0
+graphite_thickness_mm = 10.0
+
+[scenarios."5".optimization.step_control]
+project_eol = true
+reset_projected_non_descent = true
+
+[scenarios."5".optimization.bol_reactivity]
+cycle = 3
+reference = 0.18318505093556492
+definition = "rho=(k-effective-1)/k-effective at post-loading cycle-three BOL"
+
+[scenarios."5".optimization.joint_objective]
+burnup_MWd_tHM = 25433.729304329856
+temporal_variance = 0.0005058169487109013
+bol_reactivity = 0.18318505093556492
+power_metric = "maximum_channel_power_swing_MW"
+maximum_channel_power_swing_MW = 0.1210337912118528
+
+[scenarios."5".optimization.joint_objective.weights]
+burnup = 1.0
+bol_reactivity = 1.0
+maximum_channel_power_swing_MW = 1.0
+
+# ---------------------------------------------------------------------------
+# SCENARIO 6 — Discharge burnup with a fresh-fuel mass limit
+# ---------------------------------------------------------------------------
+
+[scenarios."6".cycle]
+record_temporal_power = true
+
+[scenarios."6".cycle.design]
+# Pitch increments from ring 0 to 1, 1 to 2, and 2 to 3 [mm].
+pitch_mm = [233.36698998535962, 264.2641278422627, 267.2066152628564]
+# Homogenized element radius [mm], by fuel ring 0–3.
+element_radius_mm = [25.07808522738826, 25.07808522321037, 25.078085222177226, 25.078085221925452]
+# U-235 mass fraction of uranium, by ring; 0.024 means 2.4%.
+enrichment = [0.007078085225801812, 0.03101199005557615, 0.03650365198841135, 0.05]
+# Starting common refuelling period [days].
+cycle_days = [327.6876646055817]
+# Sleeve thickness [mm]: each named row is top, middle, bottom.
+graphite_thickness_mm = [
+    10.0, 10.0, 10.0,  # B11
+    10.0, 10.0, 10.0,  # B7
+    10.0, 10.0, 10.0,  # B9
+    10.0, 10.0, 10.0,  # C10
+    10.0, 10.0, 10.0,  # C8
+    10.0, 10.0, 10.0,  # D7
+    10.0, 10.0, 10.0,  # E8
+]
+
+[scenarios."6".cycle.objective]
+power_basis = "channel"
+channel_power_weight = 0.0
+
+[scenarios."6".cycle.graphite]
+mode = "assembly_sleeves"
+positions = ["B11", "B7", "B9", "C10", "C8", "D7", "E8"]
+density_g_cm3 = 1.7
+temperature_K = 327.15
+minimum_clearance_mm = 1.0
+material_basis = """\
+    Ideal pure natural-carbon graphite at 1.70 g/cm3 and unchanged moderator temperature, using \
+    ENDF/B-VII.1 C0 and c_Graphite S(a,b). No jackets or impurities. Each 990 mm annulus replaces only \
+    surrounding water at its fixed axial position."""
+
+[scenarios."6".optimization]
+objective = "Maximize third-cycle mean discharge BU without increasing the full-core fresh UO2 loading."
+objective_kind = "channel_burnup"
+steps_per_refresh = 5
+search_id = "wr1_burnup_mass_step_6"
+burnup_scale_MWd_tHM = 5000.0
+power_weight = 0.0
+maximum_refreshes = 3
+native_score_stall_tolerance = 0.002
+checkpoint_key = "burnup_mass"
+
+[scenarios."6".optimization.learning_rates]
+cycle_days = 8.0
+graphite_thickness_mm = 1.0
+
+[scenarios."6".optimization.bounds]
+graphite_thickness_mm = [0.1, 60.0]
+
+[scenarios."6".optimization.trust_half_width]
+cycle_days = 40.0
+graphite_thickness_mm = 10.0
+
+[scenarios."6".optimization.step_control]
+project_eol = true
+reset_projected_non_descent = true
+
+[scenarios."6".optimization.eol_keff]
+cycle = { "$ref" = "#/settings/cycle/objective_cycle" }
+target = { "$ref" = "#/settings/cycle/objective/minimum_keff" }
+tolerance_standard_errors = 2.0
+penalty_weight = 1.0
+
+[scenarios."6".optimization.fresh_fuel_mass]
+maximum_fresh_fuel_mass_kg = 1147.663248501356
+reference_step = 1
+reference_native_case = 7
+radius_parameter = "element_radius_mm"
+enrichment_parameter = "enrichment"
+
+[scenarios."6".optimization.fresh_fuel_mass.basis]
+material = "fuel_uo2"
+fuel_density_g_cm3 = { "$ref" = "#/data/model/fuel/density_g_cm3" }
+fuel_volume_fraction_of_homogenized_element = { "$ref" = "#/data/model/fuel/volume_fraction" }
+physical_channels_by_ring = [1, 6, 12, 18]
+axial_assemblies_per_channel = { "$ref" = "#/settings/cycle/axial_positions" }
+fuel_mass_kg_per_mm2_by_ring = [
+    0.04932010614850145, 0.29592063689100867, 0.5918412737820173, 0.8877619106730261,
+]
+avogadro_per_mol = 6.02214076e+23
+
+[scenarios."6".optimization.fresh_fuel_mass.basis.atomic_mass_u]
+U235 = 235.043928117
+U238 = 238.050786936
+oxygen_mean = 15.999304509238561

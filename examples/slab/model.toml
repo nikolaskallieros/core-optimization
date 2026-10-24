@@ -1,0 +1,17 @@
+# Manufactured one-group data for learning the interfaces, not a reactor design.
+[geometry]
+cells = 24
+initial_width_cm = 20.0
+width_bounds_cm = [5.0, 50.0]
+
+# Homogeneous material with isotropic, nonmultiplying scattering.
+[material]
+absorption_per_cm = 0.08
+fission_per_cm = 0.06
+scatter_per_cm = 0.20
+neutrons_per_fission = 2.5
+energy_per_fission_eV = 200000000.0
+
+[optimization]
+target_keff = 1.0
+maximum_iterations = 30

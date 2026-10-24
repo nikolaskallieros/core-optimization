@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=78", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "core-optimization"
+version = "0.1.0"
+description = "OpenMC-calibrated diffusion, fitting and reactor-design examples"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "numpy>=2,<3", "scipy>=1.15,<2", "torch>=2.7,<2.8", "openmc==0.16.0",
+  "h5py>=3.11", "matplotlib>=3.9", "pandas>=2.2", "lxml>=5",
+  "uncertainties>=3.2",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8,<9"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = false
+
+[tool.setuptools.package-data]
+get_nuclear_data = ["manifests/*.json", "chains/*.xz"]
+"depletion.kernels" = ["LICENSE"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = [".", "tests"]

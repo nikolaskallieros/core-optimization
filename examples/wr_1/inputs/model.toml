@@ -1,0 +1,274 @@
+# WR-1 PHYSICAL MODEL — shared by all six scenarios
+#
+# This file defines the lattice, channel construction, material compositions,
+# fuel recipe and transport data choices. Operating conditions and optimization
+# goals belong in study.toml. The two nuclear_data/*.json files pin source
+# checksums; they are verification records, not routine case-editing inputs.
+#
+# Dimensions and temperatures carry units in their field names. Atom densities
+# are atoms/(barn cm). Extra numerical precision preserves the original model.
+
+
+# ---------------------------------------------------------------------------
+# UNITS
+# ---------------------------------------------------------------------------
+
+[units]
+length = "mm unless the field ends in _cm"
+atom_density = "atoms/barn-cm"
+temperature = "K"
+
+# ---------------------------------------------------------------------------
+# LATTICE — one row per physical channel site; q and r are hexagonal coordinates
+# ---------------------------------------------------------------------------
+
+[lattice]
+convention = "incremental triangular-lattice ring spacing; effective ring scale=sum(increments)/ring"
+# id is a stable identity; channel_type selects the construction below.
+sites = [
+    { id = "A6", q = -3, r = 4, channel_type = "passive" },
+    { id = "A8", q = -2, r = 4, channel_type = "passive" },
+    { id = "A10", q = -1, r = 4, channel_type = "passive" },
+    { id = "B3", q = -4, r = 3, channel_type = "passive" },
+    { id = "B5", q = -3, r = 3, channel_type = "fuel_large_calandria" },
+    { id = "B7", q = -2, r = 3, channel_type = "fuel_standard" },
+    { id = "B9", q = -1, r = 3, channel_type = "fuel_standard" },
+    { id = "B11", q = 0, r = 3, channel_type = "fuel_large_calandria" },
+    { id = "B13", q = 1, r = 3, channel_type = "passive" },
+    { id = "C2", q = -4, r = 2, channel_type = "passive" },
+    { id = "C4", q = -3, r = 2, channel_type = "fuel_standard" },
+    { id = "C6", q = -2, r = 2, channel_type = "fuel_standard" },
+    { id = "C8", q = -1, r = 2, channel_type = "fuel_standard" },
+    { id = "C10", q = 0, r = 2, channel_type = "fuel_standard" },
+    { id = "C12", q = 1, r = 2, channel_type = "fuel_standard" },
+    { id = "C14", q = 2, r = 2, channel_type = "passive" },
+    { id = "D1", q = -4, r = 1, channel_type = "passive" },
+    { id = "D3", q = -3, r = 1, channel_type = "fuel_standard" },
+    { id = "D5", q = -2, r = 1, channel_type = "fuel_standard" },
+    { id = "D7", q = -1, r = 1, channel_type = "fuel_large_calandria" },
+    { id = "D9", q = 0, r = 1, channel_type = "fuel_large_calandria" },
+    { id = "D11", q = 1, r = 1, channel_type = "fuel_standard" },
+    { id = "D13", q = 2, r = 1, channel_type = "fuel_standard" },
+    { id = "D15", q = 3, r = 1, channel_type = "passive" },
+    { id = "E2", q = -3, r = 0, channel_type = "fuel_large_calandria" },
+    { id = "E4", q = -2, r = 0, channel_type = "fuel_standard" },
+    { id = "E6", q = -1, r = 0, channel_type = "fuel_large_calandria" },
+    { id = "E8", q = 0, r = 0, channel_type = "fuel_large_calandria" },
+    { id = "E10", q = 1, r = 0, channel_type = "fuel_large_calandria" },
+    { id = "E12", q = 2, r = 0, channel_type = "fuel_standard" },
+    { id = "E14", q = 3, r = 0, channel_type = "fuel_large_calandria" },
+    { id = "F1", q = -3, r = -1, channel_type = "passive" },
+    { id = "F3", q = -2, r = -1, channel_type = "fuel_standard" },
+    { id = "F5", q = -1, r = -1, channel_type = "fuel_standard" },
+    { id = "F7", q = 0, r = -1, channel_type = "fuel_large_calandria" },
+    { id = "F9", q = 1, r = -1, channel_type = "fuel_large_calandria" },
+    { id = "F11", q = 2, r = -1, channel_type = "fuel_standard" },
+    { id = "F13", q = 3, r = -1, channel_type = "fuel_standard" },
+    { id = "F15", q = 4, r = -1, channel_type = "passive" },
+    { id = "G2", q = -2, r = -2, channel_type = "passive" },
+    { id = "G4", q = -1, r = -2, channel_type = "fuel_standard" },
+    { id = "G6", q = 0, r = -2, channel_type = "fuel_standard" },
+    { id = "G8", q = 1, r = -2, channel_type = "fuel_standard" },
+    { id = "G10", q = 2, r = -2, channel_type = "fuel_standard" },
+    { id = "G12", q = 3, r = -2, channel_type = "fuel_standard" },
+    { id = "G14", q = 4, r = -2, channel_type = "passive" },
+    { id = "H3", q = -1, r = -3, channel_type = "passive" },
+    { id = "H5", q = 0, r = -3, channel_type = "fuel_large_calandria" },
+    { id = "H7", q = 1, r = -3, channel_type = "fuel_standard" },
+    { id = "H9", q = 2, r = -3, channel_type = "fuel_standard" },
+    { id = "H11", q = 3, r = -3, channel_type = "fuel_large_calandria" },
+    { id = "H13", q = 4, r = -3, channel_type = "passive" },
+    { id = "J6", q = 1, r = -4, channel_type = "passive" },
+    { id = "J8", q = 2, r = -4, channel_type = "passive" },
+    { id = "J10", q = 3, r = -4, channel_type = "passive" },
+]
+
+# ---------------------------------------------------------------------------
+# CHANNEL CONSTRUCTION — radii and material names are ordered from inside to outside
+# ---------------------------------------------------------------------------
+
+[channel_types.passive]
+fuelled = false
+reference_interfaces_mm = [46.9265, 48.1965]
+materials = ["moderator", "calandria_aluminium"]
+
+[channel_types.fuel_large_calandria]
+fuelled = true
+reference_interfaces_mm = [41.275, 43.0784, 60.3885, 61.9125]
+materials = ["fuel", "pressure_tube_zr_nb", "void", "calandria_aluminium"]
+
+[channel_types.fuel_standard]
+fuelled = true
+reference_interfaces_mm = [41.275, 43.0784, 46.9265, 48.1965]
+materials = ["fuel", "pressure_tube_zr_nb", "void", "calandria_aluminium"]
+
+# ---------------------------------------------------------------------------
+# MATERIALS — fixed nonfuel compositions before the declared transport substitutions
+# ---------------------------------------------------------------------------
+
+[materials.pressure_tube_zr_nb]
+temperature_K = 623.15
+density_g_cm3 = 6.545409936138242
+
+[materials.pressure_tube_zr_nb.atom_density]
+Zr90 = 0.0216755605658238
+Zr91 = 0.004726915248756912
+Zr92 = 0.007225186855274604
+Zr94 = 0.007322084404937178
+Zr96 = 0.0011796223437183027
+Nb93 = 0.0010606748122435376
+
+[materials.moderator]
+temperature_K = 327.15
+density_g_cm3 = 1.0935380147622544
+
+[materials.moderator.atom_density]
+H1 = 0.0001447126750656811
+H2 = 0.06563377599115301
+O16 = 0.03281098766514314
+O17 = 1.2465023602248441e-05
+O18 = 6.579164436395192e-05
+
+[materials.calandria_aluminium]
+temperature_K = 327.15
+density_g_cm3 = 2.699
+
+[materials.calandria_aluminium.atom_density]
+Al27 = 0.060240293438645356
+
+[materials.void]
+temperature_K = 623.15
+density_g_cm3 = 0.0
+
+[materials.void.atom_density]
+
+# ---------------------------------------------------------------------------
+# FRESH FUEL — enrichment varies by scenario; these mixture properties are shared
+# ---------------------------------------------------------------------------
+
+[fuel]
+# Density of the UO2 constituent [g/cm3].
+density_g_cm3 = 10.6
+# UO2 fraction of the homogenized fuel-element volume.
+volume_fraction = 0.498668362070452
+basis = """\
+    Retained homogenized fuel/cladding/organic volume fractions. Inert densities preserve the original \
+    mixture arithmetic."""
+
+[fuel.oxygen_atom_fractions]
+O16 = 0.9976206
+O17 = 0.000379
+O18 = 0.0020004
+
+# ---------------------------------------------------------------------------
+# Fixed cladding and organic-coolant contributions within the homogenized element
+# ---------------------------------------------------------------------------
+
+[fuel.inert_atom_density]
+Zr90 = 0.0021035887637417122
+Zr91 = 0.00045874180620373206
+Zr92 = 0.000701196254580571
+Zr94 = 0.0007106000527469577
+Zr96 = 0.0001144810211560116
+Nb93 = 0.00010293729706521922
+C12 = 0.013547936802556655
+C13 = 0.0001517652998909142
+H1 = 0.017343640650450822
+H2 = 2.7015193295215906e-06
+
+# ---------------------------------------------------------------------------
+# TRANSPORT — energy groups, temperature treatment and declared approximations
+# ---------------------------------------------------------------------------
+
+[transport]
+# Diffusion group boundaries [eV]; native transport remains continuous-energy.
+group_edges_eV = [0.0, 0.625, 20000000.0]
+# Single temperature for the homogenized fuel element [K].
+homogenized_element_temperature_K = 1200.0
+temperature_label_tolerance_K = 0.5
+temperature_basis = """\
+    Initial single-temperature homogenized element; other regions retain their declared material \
+    temperatures. This does not resolve separate fuel, clad and coolant temperatures inside the element."""
+carbon_transport = "Combine C12 and C13 number densities into evaluated natural carbon C0."
+oxygen_transport = """\
+    ENDF/B-VII.1 has no O18 evaluation; assign its 0.20004 atom-percent oxygen abundance to O16, \
+    retaining total oxygen atom density. Track this declared data approximation."""
+moderator_thermal_scattering = ["c_D_in_D2O", "c_H_in_H2O"]
+organic_thermal_scattering = """\
+    Free-gas treatment; no evaluated HB-40 molecular scattering law is available in the selected library."""
+material_response_nuclides = ["U235", "U238", "O16", "O17"]
+statistics_block_size = 5
+comparison_mesh_subdivisions = [12, 12]
+
+[transport.boron]
+units = "mg_B10_per_kg_unborated_moderator"
+
+[transport.boron.natural_atom_fractions]
+B10 = 0.1982
+B11 = 0.8018
+
+# ---------------------------------------------------------------------------
+# DATA PREPARATION — required temperatures and NJOY processing accuracy
+# ---------------------------------------------------------------------------
+
+[transport.nuclear_data]
+library = "ENDF/B-VII.1"
+njoy_error_tolerance = 0.001
+thermal_temperatures_K = [293.6, 350.0]
+
+[transport.nuclear_data.neutron_temperatures_K]
+H1 = [327.15, 623.15, 1200.0]
+H2 = [327.15, 623.15, 1200.0]
+C0 = [623.15, 1200.0]
+O16 = [327.15, 1200.0]
+O17 = [327.15, 1200.0]
+U235 = [1199.0, 1200.0]
+U238 = [1199.0, 1200.0]
+Zr90 = [623.15, 650.0, 1200.0]
+Zr91 = [623.15, 650.0, 1200.0]
+Zr92 = [623.15, 650.0, 1200.0]
+Zr94 = [623.15, 650.0, 1200.0]
+Zr96 = [623.15, 650.0, 1200.0]
+Nb93 = [623.15, 650.0, 1200.0]
+Al27 = [327.15, 328.15, 1200.0]
+B10 = [327.15, 328.15, 1200.0]
+B11 = [327.15, 328.15, 1200.0]
+
+[transport.nuclear_data.thermal_scattering.c_D_in_D2O]
+member = "thermal_scatt/tsl-DinD2O.endf"
+nuclide = "H2"
+
+[transport.nuclear_data.thermal_scattering.c_H_in_H2O]
+member = "thermal_scatt/tsl-HinH2O.endf"
+nuclide = "H1"
+
+# Each extension names a separate output library, then its scattering tables.
+# The shared processor accepts any declared table and bound nuclide.
+[transport.nuclear_data.extensions.graphite.c_Graphite]
+nuclide = "C0"
+member = "thermal_scatt/tsl-graphite.endf"
+temperatures_K = [296.0, 400.0]
+source_sha256 = "bc5fcafcbef340269e1820942755e7535d6e1c6341cf011d9fba02afeee9795b"
+
+# ---------------------------------------------------------------------------
+# Explicit isotope substitutions used only in transport data
+# ---------------------------------------------------------------------------
+
+[transport.nuclide_aliases]
+C12 = "C0"
+C13 = "C0"
+O18 = "O16"
+
+# ---------------------------------------------------------------------------
+# DEPLETION — transport cutoff and directly scored chain reactions
+# ---------------------------------------------------------------------------
+
+[depletion]
+# Isotopes below this density are omitted from transport, not from the chain.
+transport_density_cutoff_atom_b_cm = 1e-18
+depletion_flux_refinement_check = false
+direct_nuclides = ["U235", "U238", "Pu239", "Pu240", "Pu241", "Pu242", "Xe135", "Sm149", "O16", "O17"]
+direct_reactions = ["(n,gamma)", "fission"]
+scope = """\
+    Full evaluated chain for UO2 and its products. Homogenized cladding and organic coolant remain \
+    inert. Initial checks do not establish timestep or equilibrium convergence."""

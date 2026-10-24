@@ -1,0 +1,65 @@
+{
+  "objective": "Maximize mean discharge burnup after three cycles, with a secondary penalty on cycle-three total radial-channel power variance.",
+  "objective_kind": "channel_burnup",
+  "merit": "Minimize -mean_discharge_BU/5000 + 0.1*channel_power_variance. Sum all three axial assembly powers before comparing full radial channels; weight their physical multiplicities 1,3,3.",
+  "minimum_discharge_burnup_MWd_tHM": 5000.0,
+  "burnup_definition": "Total energy divided by total initial heavy-metal mass of all seven physical assemblies discharged after three cycles; not the least-burned individual assembly.",
+  "steps_per_refresh": 5,
+  "optimizer": "Adam",
+  "learning_rates": {
+    "pitch_mm": 2.0,
+    "element_radius_mm": 1.0,
+    "enrichment": 0.001,
+    "cycle_days": 8.0
+  },
+  "bounds": {
+    "pitch_mm": [
+      150.0,
+      350.0
+    ],
+    "element_radius_mm": [
+      25.0,
+      60.0
+    ],
+    "enrichment": [
+      0.007,
+      0.05
+    ],
+    "cycle_days": [
+      20.0,
+      200.0
+    ]
+  },
+  "trust_half_width": {
+    "pitch_mm": 15.0,
+    "element_radius_mm": 5.0,
+    "enrichment": 0.006,
+    "cycle_days": 40.0
+  },
+  "bounds_basis": "User-specified fresh enrichment range 0.7% to 5%. Geometry and period bounds remain exploratory, with exact channel-clearance checks.",
+  "surrogate_keff_target": 1.002,
+  "surrogate_keff_penalty_scale": 0.002,
+  "surrogate_peak_burnup_fraction": 1.0,
+  "surrogate_peak_penalty_scale": 0.02,
+  "surrogate_burnup_penalty_scale_MWd_tHM": 100.0,
+  "surrogate_selection": "Keep the burnup minimum and peak-BU guard. Rank all such trials by the weighted objective plus the soft, anchor-corrected k-effective penalty; a small predicted k deficit is not an automatic rejection.",
+  "native_keff_standard_errors": 0.0,
+  "native_acceptance": "Nominal OpenMC mean k-effective at least 1.002 at all 33 sampled states; report standard errors separately. Require mean discharge BU at least 5000 MWd/tHM, peak BU at most 10800 MWd/tHM, enrichment 0.7% to 5%, geometry bounds, declared exploratory tally precision and energy accounting. Rank feasible designs by -BU/5000 + 0.1*total-channel power variance. Low-particle acceptance does not statistically establish a 0.002 criticality margin.",
+  "optimizer_state_policy": "Keep Adam moments within each fixed-fit batch; reset them after an OpenMC refresh. Save every evaluated design step for interruption recovery.",
+  "fixed": "Three cycles from fresh fuel, three axial assemblies per channel, 2.97 m height, 7.945946 MW full-core power, common top-insertion/bottom-discharge loading, zero boron, outer leakage boundaries, material mixture fractions and shell thicknesses, seed 20301.",
+  "scope": "Fresh search from the original design. Six variables: one inter-ring pitch, two homogenized element radii, two enrichments and one common period. Differentiate all three cycles, fit 18 shared coefficients, and verify updated native histories. Compare initial and best verified designs.",
+  "search_id": "channel_burnup",
+  "burnup_scale_MWd_tHM": 5000.0,
+  "power_weight": 0.1,
+  "native_minimum_keff": 1.002,
+  "maximum_refreshes": 6,
+  "native_score_stall_tolerance": 0.002,
+  "native_stall_batches": 2,
+  "stopping_policy": "Stop when two feasible native refreshes improve weighted score by less than 0.002, or no improving surrogate step is found. Six refreshes are a finite search cap, not a convergence claim; identify active constraints and retain the best feasible native design.",
+  "surrogate_keff_policy": "anchor_corrected_soft",
+  "surrogate_keff_error_scale_floor": 1e-12,
+  "surrogate_keff_soft_weight": 0.05,
+  "surrogate_keff_correction": "At every matched state use k_surrogate(design) + k_OpenMC(anchor) - k_surrogate(anchor). Recompute offsets after each native-history refit. Error scale is sqrt(anchor residual RMS squared + native state SE squared); the 1e-12 floor only prevents division by zero. Correction and error scales come from the runs. The scale is a heuristic for selection, not a confidence interval.",
+  "surrogate_keff_penalty": "For corrected deficit d=max(1.002-k,0) and measured error scale s, use max over all states of 0.05*(d/s)^2 + (max(d-s,0)/(0.5*s))^2. One error-scale deficit costs 0.05 in normalized score (250 MWd/tHM equivalent); larger violations receive a strong additional penalty. The 0.05 and 0.5 values shape the optimizer penalty; neither sets a correction in k-effective. Native acceptance stays at nominal k>=1.002.",
+  "surrogate_keff_large_deficit_scale": 0.5
+}

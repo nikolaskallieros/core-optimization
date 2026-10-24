@@ -1,0 +1,316 @@
+{
+  "library": "ENDF/B-VII.1",
+  "sources": {
+    "H1": {
+      "url": "https://www.nndc.bnl.gov/endf-b7.1/zips/ENDF-B-VII.1-neutrons.zip",
+      "member": "neutrons/n-001_H_001.endf",
+      "archive_etags_observed": [
+        "W/\"226499549-1706712248646\"",
+        "W/\"226499549-1710536394486\""
+      ],
+      "archive_bytes": 226499549,
+      "zip_crc32": 2278327722,
+      "bytes": 54513,
+      "sha256": "5bc558ac458face9cea2a1afba7391529df7c136415f1cb5babfab2ced4c97ce",
+      "endf_library": [
+        "ENDF/B",
+        7,
+        1
+      ]
+    },
+    "H2": {
+      "url": "https://www.nndc.bnl.gov/endf-b7.1/zips/ENDF-B-VII.1-neutrons.zip",
+      "member": "neutrons/n-001_H_002.endf",
+      "archive_etags_observed": [
+        "W/\"226499549-1706712248646\"",
+        "W/\"226499549-1710536394486\""
+      ],
+      "archive_bytes": 226499549,
+      "zip_crc32": 3020974019,
+      "bytes": 85131,
+      "sha256": "ed844e16f830c5114aa7e5e30d259c980b822ce5242eec213e20c22b75503290",
+      "endf_library": [
+        "ENDF/B",
+        7,
+        1
+      ]
+    },
+    "C0": {
+      "url": "https://www.nndc.bnl.gov/endf-b7.1/zips/ENDF-B-VII.1-neutrons.zip",
+      "member": "neutrons/n-006_C_000.endf",
+      "archive_etags_observed": [
+        "W/\"226499549-1706712248646\"",
+        "W/\"226499549-1710536394486\""
+      ],
+      "archive_bytes": 226499549,
+      "zip_crc32": 4233637233,
+      "bytes": 669870,
+      "sha256": "2b14dd7b7253d14490ca82b60928d0dad5bdc056c2de0ca6f969b581183ba5f6",
+      "endf_library": [
+        "ENDF/B",
+        7,
+        1
+      ]
+    },
+    "O16": {
+      "url": "https://www.nndc.bnl.gov/endf-b7.1/zips/ENDF-B-VII.1-neutrons.zip",
+      "member": "neutrons/n-008_O_016.endf",
+      "archive_etags_observed": [
+        "W/\"226499549-1706712248646\"",
+        "W/\"226499549-1710536394486\""
+      ],
+      "archive_bytes": 226499549,
+      "zip_crc32": 4183434046,
+      "bytes": 2986713,
+      "sha256": "8566c8c90f83dced6a24119b5a592f7302f0737da0f5888b54925ac93d79891c",
+      "endf_library": [
+        "ENDF/B",
+        7,
+        1
+      ]
+    },
+    "O17": {
+      "url": "https://www.nndc.bnl.gov/endf-b7.1/zips/ENDF-B-VII.1-neutrons.zip",
+      "member": "neutrons/n-008_O_017.endf",
+      "archive_etags_observed": [
+        "W/\"226499549-1706712248646\"",
+        "W/\"226499549-1710536394486\""
+      ],
+      "archive_bytes": 226499549,
+      "zip_crc32": 2897220611,
+      "bytes": 59211,
+      "sha256": "0a6fce44342ff342a8aeecb5d3123e75b55b770d4c8550a9959df458ba6034a3",
+      "endf_library": [
+        "ENDF/B",
+        7,
+        1
+      ]
+    },
+    "U235": {
+      "url": "https://www.nndc.bnl.gov/endf-b7.1/zips/ENDF-B-VII.1-neutrons.zip",
+      "member": "neutrons/n-092_U_235.endf",
+      "archive_etags_observed": [
+        "W/\"226499549-1706712248646\"",
+        "W/\"226499549-1710536394486\""
+      ],
+      "archive_bytes": 226499549,
+      "zip_crc32": 1194782666,
+      "bytes": 54173205,
+      "sha256": "bfcad3752a7f7487aa82e5c2a64bd91cf90030eedfee6553a43f80405244acb3",
+      "endf_library": [
+        "ENDF/B",
+        7,
+        1
+      ]
+    },
+    "U238": {
+      "url": "https://www.nndc.bnl.gov/endf-b7.1/zips/ENDF-B-VII.1-neutrons.zip",
+      "member": "neutrons/n-092_U_238.endf",
+      "archive_etags_observed": [
+        "W/\"226499549-1706712248646\"",
+        "W/\"226499549-1710536394486\""
+      ],
+      "archive_bytes": 226499549,
+      "zip_crc32": 4122460839,
+      "bytes": 33733665,
+      "sha256": "cac3e6d312d5e5ece046ef3dcc011e1f8739f2c76b9cc9257a9517c5762873c4",
+      "endf_library": [
+        "ENDF/B",
+        7,
+        1
+      ]
+    },
+    "Zr90": {
+      "url": "https://www.nndc.bnl.gov/endf-b7.1/zips/ENDF-B-VII.1-neutrons.zip",
+      "member": "neutrons/n-040_Zr_090.endf",
+      "archive_etags_observed": [
+        "W/\"226499549-1706712248646\"",
+        "W/\"226499549-1710536394486\""
+      ],
+      "archive_bytes": 226499549,
+      "zip_crc32": 3403073302,
+      "bytes": 1452330,
+      "sha256": "bfd1632ab3cb0590ad51d8414c73b77124d11a06c3571ec075e13d2c5da5452d",
+      "library_metadata_note": "NLIB=10 is Unknown to OpenMC; NNDC VII.1 archive and MF1 header identify ENDF/B-VII.1.",
+      "endf_library": [
+        "Unknown",
+        7,
+        1
+      ]
+    },
+    "Zr91": {
+      "url": "https://www.nndc.bnl.gov/endf-b7.1/zips/ENDF-B-VII.1-neutrons.zip",
+      "member": "neutrons/n-040_Zr_091.endf",
+      "archive_etags_observed": [
+        "W/\"226499549-1706712248646\"",
+        "W/\"226499549-1710536394486\""
+      ],
+      "archive_bytes": 226499549,
+      "zip_crc32": 559190782,
+      "bytes": 3468825,
+      "sha256": "43e7b4041dbca891355d1dc324b487d9f89d867fac3bd0212b8b2be98acee9f7",
+      "library_metadata_note": "NLIB=10 is Unknown to OpenMC; NNDC VII.1 archive and MF1 header identify ENDF/B-VII.1.",
+      "endf_library": [
+        "Unknown",
+        7,
+        1
+      ]
+    },
+    "Zr92": {
+      "url": "https://www.nndc.bnl.gov/endf-b7.1/zips/ENDF-B-VII.1-neutrons.zip",
+      "member": "neutrons/n-040_Zr_092.endf",
+      "archive_etags_observed": [
+        "W/\"226499549-1706712248646\"",
+        "W/\"226499549-1710536394486\""
+      ],
+      "archive_bytes": 226499549,
+      "zip_crc32": 403284699,
+      "bytes": 2186676,
+      "sha256": "e6319f50bda84715fc0d2608aee80653eef70ed1e60e1608b13f35bc9bd53ee5",
+      "library_metadata_note": "NLIB=10 is Unknown to OpenMC; NNDC VII.1 archive and MF1 header identify ENDF/B-VII.1.",
+      "endf_library": [
+        "Unknown",
+        7,
+        1
+      ]
+    },
+    "Zr94": {
+      "url": "https://www.nndc.bnl.gov/endf-b7.1/zips/ENDF-B-VII.1-neutrons.zip",
+      "member": "neutrons/n-040_Zr_094.endf",
+      "archive_etags_observed": [
+        "W/\"226499549-1706712248646\"",
+        "W/\"226499549-1710536394486\""
+      ],
+      "archive_bytes": 226499549,
+      "zip_crc32": 3422162071,
+      "bytes": 1916298,
+      "sha256": "a7abed1256e09f90e522e55d91d991c366dd0821dd8393e9d8c5eac83ae5b20b",
+      "library_metadata_note": "NLIB=10 is Unknown to OpenMC; NNDC VII.1 archive and MF1 header identify ENDF/B-VII.1.",
+      "endf_library": [
+        "Unknown",
+        7,
+        1
+      ]
+    },
+    "Zr96": {
+      "url": "https://www.nndc.bnl.gov/endf-b7.1/zips/ENDF-B-VII.1-neutrons.zip",
+      "member": "neutrons/n-040_Zr_096.endf",
+      "archive_etags_observed": [
+        "W/\"226499549-1706712248646\"",
+        "W/\"226499549-1710536394486\""
+      ],
+      "archive_bytes": 226499549,
+      "zip_crc32": 1720680110,
+      "bytes": 1486593,
+      "sha256": "02eba8d6f0d1bc6a92d52bb76bac4600a17e261f009bb61c97e6b9fed5c728b8",
+      "library_metadata_note": "NLIB=10 is Unknown to OpenMC; NNDC VII.1 archive and MF1 header identify ENDF/B-VII.1.",
+      "endf_library": [
+        "Unknown",
+        7,
+        1
+      ]
+    },
+    "Nb93": {
+      "url": "https://www.nndc.bnl.gov/endf-b7.1/zips/ENDF-B-VII.1-neutrons.zip",
+      "member": "neutrons/n-041_Nb_093.endf",
+      "archive_etags_observed": [
+        "W/\"226499549-1706712248646\"",
+        "W/\"226499549-1710536394486\""
+      ],
+      "archive_bytes": 226499549,
+      "zip_crc32": 142054393,
+      "bytes": 1452816,
+      "sha256": "c7ef4a4e74d456756604d20eae0bbe5f25d4d2ccb31bbc9ee58390fd6cfa716c",
+      "endf_library": [
+        "ENDF/B",
+        7,
+        1
+      ]
+    },
+    "Al27": {
+      "url": "https://www.nndc.bnl.gov/endf-b7.1/zips/ENDF-B-VII.1-neutrons.zip",
+      "member": "neutrons/n-013_Al_027.endf",
+      "archive_etags_observed": [
+        "W/\"226499549-1706712248646\"",
+        "W/\"226499549-1710536394486\""
+      ],
+      "archive_bytes": 226499549,
+      "zip_crc32": 1306169023,
+      "bytes": 2223045,
+      "sha256": "5c2e3cfb81a9425b9dae6f9e047c44c36deef62fa977136cbf925627e0828ba5",
+      "endf_library": [
+        "ENDF/B",
+        7,
+        1
+      ]
+    },
+    "B10": {
+      "url": "https://www.nndc.bnl.gov/endf-b7.1/zips/ENDF-B-VII.1-neutrons.zip",
+      "member": "neutrons/n-005_B_010.endf",
+      "archive_etags_observed": [
+        "W/\"226499549-1706712248646\"",
+        "W/\"226499549-1710536394486\""
+      ],
+      "archive_bytes": 226499549,
+      "zip_crc32": 2531642682,
+      "bytes": 643950,
+      "sha256": "ad1223c7c2e62c4813ca426e537e762e82c5460309e15e7a00a52c4fabf5f549",
+      "endf_library": [
+        "ENDF/B",
+        7,
+        1
+      ]
+    },
+    "B11": {
+      "url": "https://www.nndc.bnl.gov/endf-b7.1/zips/ENDF-B-VII.1-neutrons.zip",
+      "member": "neutrons/n-005_B_011.endf",
+      "archive_etags_observed": [
+        "W/\"226499549-1706712248646\"",
+        "W/\"226499549-1710536394486\""
+      ],
+      "archive_bytes": 226499549,
+      "zip_crc32": 1242754938,
+      "bytes": 701865,
+      "sha256": "fcaab00aa33d6f487ba2297895376f9491530517de104104d8c21ad5462bff13",
+      "endf_library": [
+        "ENDF/B",
+        7,
+        1
+      ]
+    },
+    "c_D_in_D2O": {
+      "url": "https://www.nndc.bnl.gov/endf-b7.1/zips/ENDF-B-VII.1-thermal_scatt.zip",
+      "member": "thermal_scatt/tsl-DinD2O.endf",
+      "archive_etags_observed": [
+        "W/\"10442639-1706712247328\"",
+        "W/\"10442639-1710536392680\""
+      ],
+      "archive_bytes": 10442639,
+      "zip_crc32": 3932454195,
+      "bytes": 8403021,
+      "sha256": "7437ab0a28b603f71b4eb703acc9f666eb2af26e0426f5462e0c80dcce95fe9e",
+      "endf_library": [
+        "ENDF/B",
+        7,
+        1
+      ]
+    },
+    "c_H_in_H2O": {
+      "url": "https://www.nndc.bnl.gov/endf-b7.1/zips/ENDF-B-VII.1-thermal_scatt.zip",
+      "member": "thermal_scatt/tsl-HinH2O.endf",
+      "archive_etags_observed": [
+        "W/\"10442639-1706712247328\"",
+        "W/\"10442639-1710536392680\""
+      ],
+      "archive_bytes": 10442639,
+      "zip_crc32": 2727187516,
+      "bytes": 7308063,
+      "sha256": "b31ae56e7a866afccfdaec765cc7f6a93cfb7e5fea2c1a3681618f0ee1ad95d0",
+      "endf_library": [
+        "ENDF/B",
+        7,
+        1
+      ]
+    }
+  }
+}
