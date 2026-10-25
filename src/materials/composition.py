@@ -238,33 +238,6 @@ def density_change_tables(density_change, microscopic, region_indices, region_co
     return result
 
 
-def microscopic_to_macroscopic(atom_density, microscopic, chi):
-    """Collapse microscopic data for arbitrary material-region assignments.
-
-    Parameters
-    ----------
-    atom_density : array_like
-        Region-by-nuclide densities in atoms/(barn cm).
-    microscopic : dict
-        Microscopic reaction arrays in barns, with leading region and nuclide axes.
-    chi : array_like
-        Region-by-energy-group fission emission spectrum.
-
-    Returns
-    -------
-    dict
-        Macroscopic reaction tables in cm⁻¹, fission spectrum and reaction-consistent total
-        and transport cross sections.
-    """
-    density = tensor(atom_density)
-    macro = {name: torch.einsum('mn,mn...->m...', density, tensor(value))
-             for name, value in microscopic.items()}
-    macro['chi'] = tensor(chi)
-    macro['total'] = macro['absorption']+macro['scatter'].sum(-1)
-    macro['transport'] = macro['total']-macro['scatter_p1']
-    return macro
-
-
 def transport_atoms(atoms, aliases):
     """Convert positive aliased nuclide densities to transport scalars.
 

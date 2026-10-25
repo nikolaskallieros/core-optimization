@@ -5,7 +5,6 @@ fractions use analytical circle/rectangle intersections, not point masks or an
 artificial material transition width. The mesh is fixed during differentiation.
 """
 from dataclasses import dataclass
-import math
 
 import torch
 

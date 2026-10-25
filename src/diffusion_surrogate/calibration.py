@@ -135,8 +135,9 @@ class CalibratedDiffusion(torch.nn.Module):
             return torch.einsum('p,p...->...', self.log_factors, getattr(self, 'basis_'+name)).exp()
 
         capture = (macro['absorption']-macro['fission'])*scale('capture')
+        fission_factor = scale('fission')
         for name in ('fission', 'nu_fission', 'kappa_fission'):
-            macro[name] = macro[name]*scale('fission')
+            macro[name] = macro[name]*fission_factor
         macro['absorption'] = capture+macro['fission']
         scattering = scale('scatter')
         for name in ('scatter', 'nu_scatter'):

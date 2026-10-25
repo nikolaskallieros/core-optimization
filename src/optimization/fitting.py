@@ -13,7 +13,6 @@ import time
 import torch
 
 from diffusion_surrogate.responses import Response, prediction_values
-from runtime.io import save_json
 
 
 @dataclass(frozen=True)
@@ -161,27 +160,6 @@ def load_fit(model, selected, *, parameter_labels=None):
             parameter.copy_(values[name])
     return {'kind': 'selected_fit', 'source': str(selected) if isinstance(selected, (str, Path)) else None,
             'metadata': record.get('metadata', {})}
-
-
-def save_fit(result, path, *, metadata=None):
-    """Atomically persist selected coefficients for a subsequent calculation.
-
-    Parameters
-    ----------
-    result : dict
-        Completed fitting report with parameter values, objective loss and identifiability
-        diagnostics.
-    path : str or pathlib.Path
-        Destination JSON path for the selected-fit record.
-    metadata : dict or None, optional
-        Caller-owned identity or provenance fields stored with the selected coefficients.
-
-    Notes
-    -----
-    Optimizer history, geometry, material data and observation values are excluded.
-    Numerical checks here do not replace the caller's design/fit acceptance rule.
-    """
-    save_json(path, selected_fit(result, metadata=metadata), durable=True)
 
 
 def fit(model, targets, reference, *, optimizer=torch.optim.LBFGS,

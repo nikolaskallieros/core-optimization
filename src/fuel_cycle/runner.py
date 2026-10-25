@@ -17,7 +17,9 @@ from numbers import Integral, Real
 
 import torch
 
-from fuel_cycle.refuelling import Bundle, CoreState, Discharge, RefuellingSchedule
+from fuel_cycle.refuelling import (
+    Bundle, CoreState, Discharge, RefuellingSchedule, _clock_value, _positive_integer,
+)
 from depletion.integrators import admissible_powered_state
 
 
@@ -75,46 +77,6 @@ def _scalar(value, name):
     return result
 
 
-def _clock(value, name):
-    """Represent a supplied clock value by its exact decimal fraction.
-
-    Parameters
-    ----------
-    value : object
-        Numerical value to validate.
-    name : str
-        Field label included in validation diagnostics.
-
-    Returns
-    -------
-    fractions.Fraction
-        Exact rational representation used to order events.
-    """
-    if isinstance(value, bool) or not isinstance(value, Real) or not math.isfinite(value):
-        raise ValueError(f"{name} must be finite real clock data")
-    return Fraction(str(value))
-
-
-def _positive_int(value, name):
-    """Require a positive integer without accepting boolean values.
-
-    Parameters
-    ----------
-    value : object
-        Numerical value to validate.
-    name : str
-        Field label included in validation diagnostics.
-
-    Returns
-    -------
-    int
-        Validated integer limit.
-    """
-    if isinstance(value, bool) or not isinstance(value, Integral) or value <= 0:
-        raise ValueError(f"{name} must be a positive integer")
-    return int(value)
-
-
 def _tolerances(*values):
     """Validate finite, nonnegative convergence tolerances.
 
@@ -150,13 +112,13 @@ def _phase_bounds(state, schedule, time, *, allow_pending_event):
         The state skips completed events or includes an event after this time.
     """
     completed = [
-        _clock(ring.first_event, "first_event")
-        + (state.event_counts[ring.name] - 1) * _clock(ring.interval, "interval")
+        _clock_value(ring.first_event, "first_event")
+        + (state.event_counts[ring.name] - 1) * _clock_value(ring.interval, "interval")
         for ring in schedule.rings if state.event_counts.get(ring.name, 0)
     ]
     if completed and max(completed) > time:
         raise CycleError("State contains refuelling events later than its starting time")
-    next_time = _clock(schedule.next_event(state).time, "next event")
+    next_time = _clock_value(schedule.next_event(state).time, "next event")
     if next_time < time or (next_time == time and not allow_pending_event):
         raise CycleError("State skipped an earlier or phase-boundary refuelling event")
 
@@ -482,11 +444,11 @@ class CycleRunner:
         """
         self.depleter, self.schedule = depleter, schedule
         self.channel_order = tuple(channel_order)
-        self.seconds_per_time_unit = _clock(seconds_per_time_unit, "seconds_per_time_unit")
-        self.max_dt_seconds = _clock(max_dt_seconds, "max_dt_seconds")
+        self.seconds_per_time_unit = _clock_value(seconds_per_time_unit, "seconds_per_time_unit")
+        self.max_dt_seconds = _clock_value(max_dt_seconds, "max_dt_seconds")
         if self.seconds_per_time_unit <= 0 or self.max_dt_seconds <= 0:
             raise ValueError("Clock scale and maximum timestep must be positive")
-        self.max_steps = _positive_int(max_steps, "max_steps")
+        self.max_steps = _positive_integer(max_steps, "max_steps")
         self.power_balance_rtol, self.power_balance_atol_w = power_balance_rtol, power_balance_atol_w
         if any(not math.isfinite(x) or x < 0 for x in (power_balance_rtol, power_balance_atol_w)):
             raise ValueError("Power balance tolerances must be finite and nonnegative")
@@ -640,13 +602,13 @@ class CycleRunner:
         Only event times are visited; long event-free spans use rational ceiling division. The
         step cap also bounds enumeration of distinct events.
         """
-        start, end = _clock(start_time, "start_time"), _clock(end_time, "end_time")
+        start, end = _clock_value(start_time, "start_time"), _clock_value(end_time, "end_time")
         if start < 0 or end < start:
             raise ValueError("Require 0 <= start_time <= end_time")
         if self.schedule.integer_clock and any(
                 isinstance(t, bool) or not isinstance(t, Integral) for t in (start_time, end_time)):
             raise ValueError("Integer schedules require explicit integer start/end ticks")
-        limit = self.max_steps if max_steps is None else _positive_int(max_steps, "max_steps")
+        limit = self.max_steps if max_steps is None else _positive_integer(max_steps, "max_steps")
         if limit > self.max_steps:
             raise ValueError("Per-run step limit cannot exceed the configured budget")
         _phase_bounds(state, self.schedule, start, allow_pending_event=True)
@@ -684,10 +646,10 @@ class CycleRunner:
                 discharged += channels[ring]
 
         pending = self.schedule.next_event(state)
-        if _clock(pending.time, "event time") == start:
+        if _clock_value(pending.time, "event time") == start:
             event_call(pending)
         for event in self.schedule.events(end_time, start=start_time):
-            segment(_clock(event.time, "event time") * self.seconds_per_time_unit)
+            segment(_clock_value(event.time, "event time") * self.seconds_per_time_unit)
             event_call(event)
         segment(end * self.seconds_per_time_unit)
         return dict(start_time=start_time, end_time=end_time, steps=steps,
@@ -732,11 +694,11 @@ class CycleRunner:
         optimization.
         """
         plan = self.plan_run(state, start_time=start_time, end_time=end_time, max_steps=max_steps)
-        start, end = _clock(start_time, "start_time"), _clock(end_time, "end_time")
+        start, end = _clock_value(start_time, "start_time"), _clock_value(end_time, "end_time")
         limit = self.max_steps if max_steps is None else int(max_steps)
         self._validate(state)
         if any(
-            bundle.inserted_at is not None and _clock(bundle.inserted_at, "inserted_at") > start
+            bundle.inserted_at is not None and _clock_value(bundle.inserted_at, "inserted_at") > start
             for bundle in _bundles(state, self.channel_order)
         ):
             raise CycleError("Initial state contains a bundle inserted after start_time")
@@ -751,7 +713,7 @@ class CycleRunner:
         snapshots, discharges, steps = [], [], 0
         while True:
             event = self.schedule.next_event(state)
-            event_time = _clock(event.time, "event time") * self.seconds_per_time_unit
+            event_time = _clock_value(event.time, "event time") * self.seconds_per_time_unit
             if event_time < current:
                 raise CycleError("Initial/restarted state skipped an earlier refuelling event")
             if event_time == current:
@@ -775,7 +737,7 @@ class CycleRunner:
                 break
             if steps >= limit:
                 raise CycleError(f"Lifecycle exceeded its {limit}-step budget before end_time")
-            event_time = _clock(self.schedule.next_event(state).time, "event time") * self.seconds_per_time_unit
+            event_time = _clock_value(self.schedule.next_event(state).time, "event time") * self.seconds_per_time_unit
             stop = min(finish, current + self.max_dt_seconds, event_time)
             duration = _scalar(float(stop - current), "duration")
             time = _scalar(float(current), "time")
@@ -859,7 +821,7 @@ class CycleRunner:
         cannot establish that an arbitrary callback repeats.
         """
         period = self.schedule.common_cycle(max_ticks=max_cycle_ticks)
-        _positive_int(max_cycles, "max_cycles")
+        _positive_integer(max_cycles, "max_cycles")
         _tolerances(inventory_atol, energy_atol_j, burnup_atol, rtol)
         if isinstance(start_time, bool) or not isinstance(start_time, Integral) or start_time < 0:
             raise ValueError("Equilibrium needs an explicit nonnegative integer start tick")

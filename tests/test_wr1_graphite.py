@@ -7,7 +7,8 @@ import unittest
 
 import torch
 
-from diffusion_surrogate.hexagonal import C6Grid, circle_triangle_area
+from diffusion_surrogate.hexagonal import C6Grid
+from geometry.intersections import circle_triangle_area
 from geometry.diffusion import material_fractions
 from examples.wr_1.build_geometry import parameterized_geometry
 from examples.wr_1.model.case import study

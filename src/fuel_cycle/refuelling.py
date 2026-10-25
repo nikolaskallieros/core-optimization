@@ -40,7 +40,7 @@ def _readonly(values: Mapping[str, Any]) -> Mapping[str, Any]:
     return MappingProxyType(dict(values))
 
 
-def _number(value: float | int, name: str) -> Fraction:
+def _clock_value(value: float | int, name: str) -> Fraction:
     """Convert a finite clock value to an exact decimal fraction.
 
     Parameters
@@ -96,7 +96,7 @@ class Bundle:
     def __post_init__(self) -> None:
         """Validate insertion time and freeze inventory/history mappings."""
         if self.inserted_at is not None:
-            _number(self.inserted_at, "inserted_at")
+            _clock_value(self.inserted_at, "inserted_at")
         object.__setattr__(self, "inventory", _readonly(self.inventory))
         object.__setattr__(self, "history", _readonly(self.history))
 
@@ -124,10 +124,10 @@ class RingSchedule:
         if len(set(channels)) != len(channels):
             raise ValueError("Channel names must be unique within a ring")
         _positive_integer(self.levels, "levels")
-        if _number(self.interval, "interval") <= 0:
+        if _clock_value(self.interval, "interval") <= 0:
             raise ValueError("interval must be positive")
         first = self.interval if self.first_event is None else self.first_event
-        if _number(first, "first_event") <= 0:
+        if _clock_value(first, "first_event") <= 0:
             raise ValueError("first_event must be positive")
         object.__setattr__(self, "channels", channels)
         object.__setattr__(self, "first_event", first)
@@ -169,7 +169,7 @@ class RefuellingEvent:
 
     def __post_init__(self) -> None:
         """Validate event time and freeze positive ring-event ordinals."""
-        if _number(self.time, "event time") <= 0 or not self.ordinals:
+        if _clock_value(self.time, "event time") <= 0 or not self.ordinals:
             raise ValueError("An event needs a positive time and at least one ring")
         for value in self.ordinals.values():
             _positive_integer(value, "event ordinal")
@@ -271,7 +271,7 @@ class RefuellingSchedule:
             isinstance(value, bool) or not isinstance(value, Integral)
         ):
             raise ValueError(f"{name} must be explicit integer ticks")
-        return _number(value, name)
+        return _clock_value(value, name)
 
     def _time(self, ring: RingSchedule, ordinal: int) -> Fraction:
         """Compute the exact time of a ring's numbered displacement.

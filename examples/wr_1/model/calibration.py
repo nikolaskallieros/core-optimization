@@ -1,6 +1,6 @@
 """WR-1 spatial closure groups, observation weights and mesh selection."""
 import torch
-from diffusion_surrogate.hexagonal import SparseDiffusion3D
+from diffusion_surrogate import SparseDiffusion3D
 from diffusion_surrogate.regional import RegionalSurrogate
 from diffusion_surrogate.equivalence import equivalence_bases as spatial_bases, shared_bases
 from diffusion_surrogate.solver import tensor

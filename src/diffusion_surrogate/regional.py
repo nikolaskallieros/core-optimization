@@ -5,8 +5,7 @@ import torch
 from diffusion_surrogate.calibration import CalibratedDiffusion
 from diffusion_surrogate.solver import tensor
 from diffusion_surrogate.inventory import InventoryCrossSections
-from materials.composition import density_change_tables
-from materials.composition import map_nuclides
+from materials.composition import density_change_tables, map_nuclides
 
 
 class RegionalSurrogate(CalibratedDiffusion):
@@ -171,7 +170,7 @@ class RegionalSurrogate(CalibratedDiffusion):
         fuel = []
         for name in response["nuclides"]:
             names = [n for n in nuclides if self.aliases.get(n, n) == name]
-            selected = [indices[n] for n in names if n in indices]
+            selected = [indices[n] for n in names]
             fuel.append(inventory[:, selected].sum(-1) * 1e-24)
         fuel = torch.stack(fuel, dim=1)
         inert = [map_nuclides(self.case["regions"][i]["inert_atom_density"], self.aliases) for i in self.fuel_indices]

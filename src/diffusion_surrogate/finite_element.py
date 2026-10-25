@@ -6,7 +6,7 @@ eigenproblem and its first-order implicit derivative reuse the sparse solver.
 
 import torch
 
-from .hexagonal import SparseDiffusion3D
+from .solver3d import SparseDiffusion3D
 from .solver import tensor
 
 
@@ -143,13 +143,8 @@ class FiniteElementDiffusion(SparseDiffusion3D):
         gradients = reference @ torch.linalg.inv(jacobian).transpose(-1, -2)
         stiffness = volumes[:, None, None] * (gradients @ gradients.transpose(-1, -2))
         mass = volumes[:, None, None] * (torch.eye(4, dtype=points.dtype) + 1) / 20
-        total = fractions @ (macro["absorption"] + macro["scatter"].sum(-1))
-        scatter = torch.einsum("cm,mgh->cgh", fractions, macro["nu_scatter"])
-        fission = torch.einsum("cm,mo,mi->coi", fractions, macro["chi"], macro["nu_fission"])
-        transport = fractions @ macro["transport"]
-        if bool((transport.detach() <= 0).any()):
-            raise ArithmeticError("Nonpositive transport cross section in the diffusion mesh")
-        diffusion, groups = 1 / (3 * transport), total.shape[1]
+        total, scatter, fission, diffusion = self._material_coefficients(fractions, macro)
+        groups = total.shape[1]
         extrapolation = tensor(extrapolation).expand(len(self.grid.boundary_names), groups)
         row = cells[:, :, None].expand(-1, -1, 4).flatten()
         column = cells[:, None, :].expand(-1, 4, -1).flatten()
@@ -185,22 +180,5 @@ class FiniteElementDiffusion(SparseDiffusion3D):
             escape = escape.index_add(0, faces.flatten(),
                                       (areas[:, None, None] * coefficient / 3).expand(-1, 3, -1).reshape(-1, groups))
 
-        def assemble(rows, columns, values):
-            """Combine sparse Galerkin blocks in group-major node order.
-
-            Parameters
-            ----------
-            rows, columns : list of torch.Tensor
-                Block coordinate indices.
-            values : list of torch.Tensor
-                Live block coefficients.
-
-            Returns
-            -------
-            torch.Tensor
-                Coalesced sparse multigroup operator.
-            """
-            return torch.sparse_coo_tensor(torch.stack((torch.cat(rows), torch.cat(columns))),
-                                          torch.cat(values), (n * groups, n * groups)).coalesce()
-
-        return assemble(ar, ac, av), assemble(br, bc, bv), escape
+        return (self._assemble(ar, ac, av, n * groups),
+                self._assemble(br, bc, bv, n * groups), escape)

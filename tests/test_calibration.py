@@ -4,8 +4,8 @@ import math
 import pytest
 import torch
 
-from diffusion_surrogate import CalibratedDiffusion, Diffusion3D, Grid3D
-from diffusion_surrogate.hexagonal import C6Grid, SparseDiffusion3D
+from diffusion_surrogate import CalibratedDiffusion, Diffusion3D, Grid3D, SparseDiffusion3D
+from diffusion_surrogate.hexagonal import C6Grid
 from diffusion_surrogate.solver import tensor
 from optimization.fitting import fit
 

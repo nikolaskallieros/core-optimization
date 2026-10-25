@@ -1,8 +1,7 @@
 import torch
 
-from diffusion_surrogate import Diffusion3D, Grid3D
+from diffusion_surrogate import Diffusion3D, Grid3D, SparseDiffusion3D
 from diffusion_surrogate.solver import tensor
-from diffusion_surrogate.hexagonal import SparseDiffusion3D
 
 
 def test_implicit_gradient_keeps_the_same_forward_solution():

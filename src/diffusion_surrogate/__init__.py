@@ -9,7 +9,7 @@ _EXPORTS = {name: module for module, names in {
     'solver': ('Diffusion', 'Grid', 'Materials', 'circle_fractions'),
     'calibration': ('CalibratedDiffusion',),
     'responses': ('Response', 'rebin', 'cartesian_responses'),
-    'solver3d': ('Grid3D', 'Diffusion3D', 'cylinder_regions'),
+    'solver3d': ('Grid3D', 'Diffusion3D', 'SparseDiffusion3D', 'cylinder_regions'),
     'regional': ('RegionalSurrogate',),
     'geometry': ('DiffusionGeometry',),
     'finite_element': ('FiniteElementDiffusion', 'TetrahedralGrid'),
