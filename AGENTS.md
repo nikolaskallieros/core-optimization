@@ -94,6 +94,42 @@ category before introducing another package or a catch-all utilities folder.
   before changing or running the optimization. Record clarified decisions in
   `goals.md` and update the corresponding inputs before continuing.
 
+## Feasible optimization and continuation
+
+- Retain the best improving **feasible** candidate encountered during each
+  diffusion search. Check physical bounds and every declared constraint at its
+  stated tolerance; the last iterate is not automatically the best proposal.
+  Keep feasible candidates and their objective values in the saved history.
+- Several diffusion iterations may use the same OpenMC reference. Verify the
+  best feasible improvement with OpenMC, then start the next round from the
+  latest **OpenMC-accepted** design and its updated calibration.
+- Surrogate feasibility does not establish native feasibility. Accept a design
+  only when OpenMC meets the constraints and improves the declared objective.
+  After rejection, preserve the accepted design and retry using a smaller step,
+  improved calibration or additional sampling, as appropriate to the discrepancy.
+  Never loosen constraints to accept a trial.
+- The accepted objective must improve monotonically for minimization (reverse
+  for maximization). Show rejected trials separately; they must not replace the
+  accepted design or its optimization starting point.
+- Continue while feasible improvements remain. Record a numerical stopping
+  criterion in the inputs and goals. An iteration or resource limit is a limit,
+  not evidence of convergence; do not declare completion merely because an
+  agent-chosen small number of rounds has elapsed.
+- Resuming must restore accepted parameters and their native state, preserve
+  the original targets and inventory, and retain earlier evidence.
+
+## Optimization plots
+
+- Generate progress figures after every native verification and at the end of
+  a campaign, in the design's standard figure directory.
+- Show accepted objective history, rejected trials, constraint values and
+  limits (including native uncertainties), and diffusion search histories.
+  Mark the feasible iterate selected for each native proposal.
+- Keep native observations and surrogate predictions visually distinct. Do not
+  join missing checkpoint history as if those iterations had been retained.
+- Retain before/after physical response plots and changed design parameters.
+  Generate figures from saved records without rerunning transport for plotting.
+
 ## Configuration and scientific contracts
 
 - Read scenario values through the resolved design configuration. Keep one

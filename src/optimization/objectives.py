@@ -457,6 +457,49 @@ def joint_merit(burnup, temporal_variance, bol_keff, reference, *, power_swing_M
             + weight["bol_reactivity"] * ((1. - 1./bol_keff) / scales[2] - 1.))
 
 
+def relative_power_density(power, volumes):
+    """Normalize local power density by its physical volume-weighted average.
+
+    Parameters
+    ----------
+    power : torch.Tensor
+        Region-integrated powers in a common power unit.
+    volumes : torch.Tensor
+        Matching physical region volumes in a common volume unit.
+
+    Returns
+    -------
+    torch.Tensor
+        Dimensionless local-to-average power densities with the input shape.
+
+    Raises
+    ------
+    ValueError
+        Power and volume axes differ; broadcasting would change the population.
+    """
+    if power.shape != volumes.shape:
+        raise ValueError("Power and volume axes must match")
+    return (power / volumes) / (power.sum() / volumes.sum())
+
+
+def smooth_maximum(values, sharpness):
+    """Approximate a maximum with a differentiable log-sum-exp upper bound.
+
+    Parameters
+    ----------
+    values : torch.Tensor
+        Dimensionless responses over the population being optimized.
+    sharpness : float
+        Positive dimensionless sharpness; larger values approach the exact maximum.
+
+    Returns
+    -------
+    torch.Tensor
+        Scalar smooth maximum, with derivatives for every input response.
+    """
+    return torch.logsumexp(sharpness * values.reshape(-1), dim=0) / sharpness
+
+
 def first_crossing(coordinates, values, *, target=1., extrapolate=False):
     """Interpolate the first downward threshold crossing of a history.
 

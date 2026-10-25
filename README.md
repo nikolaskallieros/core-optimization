@@ -256,6 +256,17 @@ It adds actual OpenMC transport, a ten-day depletion history, material calibrati
 radius optimization and a new OpenMC verification. Manufactured cross sections
 keep the demonstration self-contained; no evaluated nuclear-data download is needed.
 
+The [pin and axial enrichment study](designs/enrichment_shaping/README.md) uses
+evaluated nuclear data and **490 enrichment variables** to shape a 7 × 7 lattice's
+power distribution, without depletion. Its native reference, cross-section fit
+and derivative checks use the same shared geometry. It changes enrichments at
+fixed geometry and U-235 inventory while preserving the reference k-effective.
+OpenMC verification selected a design with peak/average fuel power density
+reduced from **1.992 to 1.614 (19.0%)**. Each new search starts from the last
+accepted design; rejected trials preserve that result. The design page includes
+all ten verification rounds, progress curves and before/after power and
+enrichment maps.
+
 Full WR-1 runs require evaluated nuclear data and at least 10 GiB of free space
 for preparation. Follow the [WR-1 running instructions](designs/wr_1/README.md#nuclear-data-and-running-a-scenario).
 Only figures are versioned under design result folders; new runs regenerate

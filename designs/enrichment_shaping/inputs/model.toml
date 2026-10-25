@@ -1,0 +1,79 @@
+# Illustrative cold UO2/water lattice; dimensions do not represent a named reactor.
+# Geometry, composition and numerical settings are edited only here.
+
+[geometry]
+shape = [7, 7]
+pitch_cm = [4.007343651686063, 4.007343651686063]
+fuel_radius_cm = 1.3039769025327665
+fuel_height_cm = 100.0
+axial_segments = 10
+reflector_cm = [5.04, 5.04, 10.0]
+boundaries = ["vacuum", "vacuum", "vacuum", "vacuum", "vacuum", "vacuum"]
+
+[materials]
+fuel_density_g_cm3 = 10.4
+water_density_g_cm3 = 0.997
+temperature_K = 293.6
+initial_enrichment_wt_percent = 4.0
+enrichment_bounds_wt_percent = [2.0, 5.0]
+oxygen_atom_fractions = { O16 = 1.0 }
+
+[nuclear_data]
+cache = "endfb71_nndc"
+source_xml = "https://raw.githubusercontent.com/openmc-data-storage/ENDF-B-VII.1-NNDC/main/h5_files/cross_sections.xml"
+names = ["H1", "O16", "U235", "U238", "c_H_in_H2O"]
+
+[transport]
+# Group bins are ordered from low to high energy, matching native tally order.
+group_edges_eV = [0.0, 0.625, 20000000.0]
+power_W = 1000000.0
+temperature_label_tolerance_K = 1.0
+statistics_block_size = 5
+
+[calibration]
+iterations = 80
+keff_scale = 0.0001
+power_relative_scale = 0.01
+keff_absolute_tolerance = 0.00002
+group_power_relative_tolerance = 0.005
+
+[mesh]
+# Resolve the fuel separately from the surrounding water; all interfaces remain exact.
+cells_per_pitch = 2
+radial_reflector_cells = 2
+axial_cells_per_segment = 1
+axial_reflector_cells = 1
+refinement_factor = 2
+
+[openmc]
+particles = 20000
+batches = 120
+inactive = 40
+seed = 275012
+threads = 4
+
+[optimization]
+keff_reference = "baseline"
+keff_absolute_tolerance = 0.005
+prediction_margin = 0.002
+native_sigma_multiplier = 2.0
+# Continue until no feasible improvement or the minimum local step is reached.
+minimum_enrichment_step_wt_percent = 0.015625
+iterations = 80
+ftol = 0.000000001
+enrichment_step_limit_wt_percent = 0.5
+smooth_max_sharpness = 50.0
+
+[critical_reference]
+# Optional sizing controls, used only when keff_reference is explicitly "critical".
+# This study uses "baseline", so its geometry remains fixed.
+radial_scale_bounds = [0.5, 4.0]
+max_updates = 6
+scale_step_limit = 1.0
+gradient_step = 0.0001
+
+[verification]
+inventory_relative_tolerance = 0.000000001
+gradient_step_wt_percent = 0.001
+gradient_relative_tolerance = 0.0003
+volume_relative_tolerance = 0.0000000001

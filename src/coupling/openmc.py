@@ -188,11 +188,40 @@ def run(case, directory):
         Completed native observations, microscopic/material responses and optional physical
         depletion rates.
     """
+    directory = Path(directory)
+    tick = time.perf_counter()
+    _, materials = build(case, directory)
+    return run_prepared(case, directory, materials=materials, started=tick)
+
+
+def run_prepared(case, directory, *, materials=None, started=None):
+    """Run already-exported OpenMC XML and extract its matching observations.
+
+    Parameters
+    ----------
+    case : dict
+        Native case matching the prepared materials, geometry and tally inputs.
+    directory : str or pathlib.Path
+        Prepared calculation directory.
+    materials : sequence or None, optional
+        Ordered material objects; None rebuilds them from the case for extraction.
+    started : float or None, optional
+        Wall-clock start from perf_counter; None starts at native execution.
+
+    Returns
+    -------
+    dict
+        Transport, regional cross sections and requested composition responses.
+
+    Notes
+    -----
+    The caller owns input preparation. SteadyStateTransport uses this entry point
+    to reuse one CAD conversion while changing only material compositions.
+    """
     from diffusion_surrogate.reference import native_batches
 
     directory = Path(directory)
-    tick = time.perf_counter()
-    model, materials = build(case, directory)
+    tick = time.perf_counter() if started is None else started
     collapsed = {}
 
     def postprocess(dll):
@@ -212,6 +241,69 @@ def run(case, directory):
                              postprocess=postprocess if case.get("need_depletion_rates") else None)
     return extract_completed(case, directory, batches=batches, materials=materials, started=tick,
                              collapsed=collapsed)
+
+
+class SteadyStateTransport:
+    """Reuse fixed CAD for independent continuous-energy composition evaluations."""
+
+    def __init__(self, case, geometry, directory):
+        """Prepare the geometry and tallies once for a fixed physical design.
+
+        Parameters
+        ----------
+        case : dict
+            Complete native reference case. Depletion is disabled explicitly.
+        geometry : geometry.CadGeometry
+            Shared physical geometry, fixed for this transport object's lifetime.
+        directory : str or pathlib.Path
+            Preparation directory retaining the authoritative STEP and initial XML.
+        """
+        from copy import deepcopy
+
+        if case["need_depletion_rates"]:
+            raise ValueError("SteadyStateTransport requires depletion to be disabled")
+        self.case = deepcopy(case)
+        self.directory = Path(directory).resolve()
+        self.model, self.materials = build(case, self.directory, geometry=geometry)
+
+    def __call__(self, atom_densities, directory, *, sampling=None):
+        """Evaluate new compositions on the prepared geometry in a fresh process.
+
+        Parameters
+        ----------
+        atom_densities : sequence of dict
+            Nuclide densities in atoms/(barn cm), in physical region order.
+        directory : str or pathlib.Path
+            New native result directory; receives effective inputs and observations.
+        sampling : dict or None, optional
+            Complete particle/batch/seed/thread settings; None uses the reference.
+
+        Returns
+        -------
+        dict
+            Effective case and independently evaluated continuous-energy result.
+        """
+        from copy import deepcopy
+        from coupling.native import run_native
+
+        case = deepcopy(self.case)
+        for region, material, atoms in zip(case["regions"], self.materials, atom_densities, strict=True):
+            region["atom_density"] = atoms
+            if region["depletable"]:
+                region["fresh_fuel_atom_density"] = atoms
+            for name in material.get_nuclides():
+                material.remove_nuclide(name)
+            for name, value in atoms.items():
+                material.add_nuclide(name, value)
+        case["sampling"] = dict(self.case["sampling"] if sampling is None else sampling)
+        for key in ("particles", "batches", "inactive", "seed"):
+            setattr(self.model.settings, key, case["sampling"][key])
+        self.model.settings.statepoint = {"batches": [case["sampling"]["batches"]]}
+        directory = Path(directory).resolve()
+        directory.mkdir(parents=True, exist_ok=True)
+        self.model.export_to_xml(directory)
+        result = run_native(case, directory, driver="coupling.openmc:run_prepared")
+        return {"case": case, "result": result}
 
 
 def extract_completed(case, directory, *, batches=None, materials=None, started=None, collapsed=None):

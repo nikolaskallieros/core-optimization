@@ -64,10 +64,10 @@ class Snapshot:
     metadata: dict = field(default_factory=dict)
 
 
-def optimize(design, detailed, surrogate, targets, objective, *, optimizer,
+def optimize(design, detailed, surrogate, targets, objective, *, optimizer=None,
              steps, accept, project=None, fit_options=None, initial_fit=None,
              initial_snapshot=None, callback=None, fit_accept=None,
-             surrogate_steps=1, keep_best=False):
+             surrogate_steps=1, keep_best=False, search=None, stop=None):
     """Alternate surrogate fitting, design proposals and detailed evaluation.
 
     Parameters
@@ -82,10 +82,12 @@ def optimize(design, detailed, surrogate, targets, objective, *, optimizer,
         Calibration targets supplied to the shared fitting engine.
     objective : callable
         Map common named model outputs to one finite scalar Torch objective to minimize.
-    optimizer : torch.optim.Optimizer
-        Optimizer selecting the trainable design parameters to update.
-    steps : int
-        Number of detailed design proposals; zero performs only the current-state fit.
+    optimizer : torch.optim.Optimizer or None, optional
+        Optimizer selecting the trainable design parameters to update. Supply
+        either this optimizer or an explicit search callback.
+    steps : int or None
+        Maximum detailed proposals; zero fits only the current state. None
+        continues until the stop predicate or an explicit search stopping result.
     accept : callable
         Decide accept(current_snapshot, candidate_snapshot, proposal_record), returning bool
         or a mapping with an accepted flag.
@@ -105,6 +107,15 @@ def optimize(design, detailed, surrogate, targets, objective, *, optimizer,
         Number of inexpensive optimizer steps before each detailed evaluation.
     keep_best : bool, optional
         Retain the best surrogate iterate before requesting detailed verification.
+    search : callable or None, optional
+        Alternative search(design, model, objective) returning the common
+        minimize result fields. This supports constrained searches without
+        duplicating native verification or calibration orchestration. Each
+        callback invocation owns a fresh optimizer state. A result containing
+        proposed=False stops without a native call and restores the current design.
+    stop : callable or None, optional
+        Stop after fitting when stop(current_native_snapshot) is true. The
+        criterion uses the detailed result, including at the initial reference.
 
     Returns
     -------
@@ -141,16 +152,20 @@ def optimize(design, detailed, surrogate, targets, objective, *, optimizer,
     closure protocol, including L-BFGS. keep_best optionally retains the best surrogate step
     before verification.
     """
-    if steps < 0 or surrogate_steps < 1:
+    if (steps is not None and steps < 0) or surrogate_steps < 1:
         raise ValueError('Use nonnegative design steps and positive surrogate_steps')
     parameters = [p for p in design.parameters() if p.requires_grad]
-    _optimized_parameters(design, optimizer)
+    if (optimizer is None) == (search is None):
+        raise ValueError('Supply either a Torch optimizer or an explicit search')
+    if optimizer is not None:
+        _optimized_parameters(design, optimizer)
     options = dict(fit_options or {})
     options.setdefault('jacobian_mode', 'forward')
     reference = initial_snapshot
     fit_initial = initial_fit
     fits, proposals = [], []
     detailed_wall = []
+    stop_reason, stopped_search = None, None
 
     def evaluate(previous):
         """Evaluate and time the detailed model at the current design.
@@ -191,7 +206,8 @@ def optimize(design, detailed, surrogate, targets, objective, *, optimizer,
 
     if reference is None:
         reference = evaluate(None)
-    for step in range(steps+1):
+    step = 0
+    while True:
         model = surrogate(design, reference)
         started = time.perf_counter()
         with frozen(parameters):
@@ -204,28 +220,39 @@ def optimize(design, detailed, surrogate, targets, objective, *, optimizer,
         fit_initial = chosen
         if callback is not None:
             callback('fit', step, {'report': report, 'selected_fit': chosen, 'snapshot': reference})
-        if step == steps:
+        if steps is not None and step == steps:
+            stop_reason = 'proposal_limit'
+            break
+        if stop is not None and stop(reference):
+            stop_reason = 'caller_stop'
             break
         detailed_before = float(scalar(reference.outputs))
         before = {name: value.detach().clone() for name, value in design.named_parameters()}
-        optimizer_before = deepcopy(optimizer.state_dict())
+        optimizer_before = None if optimizer is None else deepcopy(optimizer.state_dict())
 
         def restore():
             """Restore the design and optimizer state saved before a proposal."""
             with torch.no_grad():
                 for name, parameter in design.named_parameters():
                     parameter.copy_(before[name])
-            optimizer.load_state_dict(optimizer_before)
+            if optimizer is not None:
+                optimizer.load_state_dict(optimizer_before)
 
-        search = minimize(design, model, objective, optimizer=optimizer,
-                          steps=surrogate_steps, project=project, keep_best=keep_best)
+        search_result = (minimize(design, model, objective, optimizer=optimizer,
+                                 steps=surrogate_steps, project=project, keep_best=keep_best)
+                         if search is None else search(design, model, objective))
+        if not search_result.get('proposed', True):
+            restore()
+            stopped_search = search_result
+            stop_reason = search_result['stop_reason']
+            break
         proposal = {'step': step+1, 'design_before': {k: v.tolist() for k, v in before.items()},
                     'design_candidate': {k: v.detach().tolist() for k, v in design.named_parameters()},
-                    'gradient': search['gradient'], 'surrogate_objective_before': search['objective_before'],
-                    'surrogate_objective_candidate': search['objective_after'],
+                    'gradient': search_result['gradient'], 'surrogate_objective_before': search_result['objective_before'],
+                    'surrogate_objective_candidate': search_result['objective_after'],
                     'detailed_objective_before': detailed_before,
-                    'solve_wall_s': search['forward_wall_s'], 'backward_wall_s': search['backward_wall_s'],
-                    'optimization': search}
+                    'solve_wall_s': search_result['forward_wall_s'], 'backward_wall_s': search_result['backward_wall_s'],
+                    'optimization': search_result}
         try:
             if callback is not None:
                 callback('proposal', step, proposal)
@@ -251,6 +278,8 @@ def optimize(design, detailed, surrogate, targets, objective, *, optimizer,
         if callback is not None:
             callback('decision', step, {'proposal': proposal, 'snapshot': reference,
                                          'candidate': candidate})
+        step += 1
     return {'model': model, 'snapshot': reference, 'selected_fit': fit_initial,
             'fits': fits, 'proposals': proposals, 'detailed_wall_s': detailed_wall,
+            'stop_reason': stop_reason, 'stopped_search': stopped_search,
             'design_parameters': {k: v.detach().tolist() for k, v in design.named_parameters()}}

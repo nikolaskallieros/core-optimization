@@ -89,6 +89,29 @@ class HexagonalDomain:
                 [a, 2 * h, float(z_edges_cm[-1])] if self.full else [a, h, float(z_edges_cm[-1])])
 
 
+def rectangular_centers(shape, pitch_cm):
+    """Place a centered rectangular lattice with x varying fastest.
+
+    Parameters
+    ----------
+    shape : tuple of int
+        Number of sites along x and y.
+    pitch_cm : sequence of float or torch.Tensor
+        Site pitches along x and y in cm; tensor pitches retain derivatives.
+
+    Returns
+    -------
+    torch.Tensor
+        Site-by-coordinate centers in cm.
+    """
+    nx, ny = shape
+    px, py = pitch_cm
+    x = (torch.arange(nx, dtype=torch.float64) - (nx - 1) / 2) * px
+    y = (torch.arange(ny, dtype=torch.float64) - (ny - 1) / 2) * py
+    yy, xx = torch.meshgrid(y, x, indexing="ij")
+    return torch.stack((xx, yy), dim=-1).reshape(-1, 2)
+
+
 def cylinder_clearances(domain, xy_cm, outer_radius_cm, *, obstacles=None):
     """Compute minimum cylinder-pair, wall and obstacle clearances.
 

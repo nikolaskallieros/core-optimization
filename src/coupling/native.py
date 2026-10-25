@@ -11,6 +11,56 @@ import numpy as np
 from runtime.io import load_state, save_state
 
 
+def run_native(case, directory, *, driver="coupling.openmc:run", on_start=None):
+    """Evaluate one explicit transport case in an isolated native process.
+
+    Parameters
+    ----------
+    case : dict
+        Serializable native inputs, including particle sampling settings.
+    directory : str or pathlib.Path
+        Calculation directory. A prepared-input driver may use existing XML.
+    driver : str, optional
+        Importable module:function receiving the case and calculation directory.
+    on_start : callable or None, optional
+        Callback receiving the child process ID after launch.
+
+    Returns
+    -------
+    dict
+        Completed native result loaded from result.json and its array file.
+
+    Raises
+    ------
+    RuntimeError
+        The native process fails; native.log retains its diagnostic output.
+    """
+    from runtime.io import save_json
+
+    directory = Path(directory).resolve()
+    directory.mkdir(parents=True, exist_ok=True)
+    save_json(directory / "case.json", case)
+    environment = dict(os.environ, CORE_NATIVE_DIRECTORY=str(directory),
+                       CORE_NATIVE_DRIVER=driver,
+                       OMP_NUM_THREADS=str(case["sampling"]["threads"]),
+                       OPENBLAS_NUM_THREADS="1")
+    process = None
+    try:
+        with (directory / "native.log").open("w") as log:
+            process = subprocess.Popen([sys.executable, "-m", "coupling.native"], env=environment,
+                                       stdout=log, stderr=subprocess.STDOUT)
+            if on_start is not None:
+                on_start(process.pid)
+            code = process.wait()
+        if code:
+            raise RuntimeError(f"OpenMC failed ({code}); inspect {directory / 'native.log'}")
+        return load_state(directory / "result.json")
+    finally:
+        if process is not None and process.poll() is None:
+            process.terminate()
+            process.wait()
+
+
 def evaluate_native(physical, inventory, boron, sampling, path, directory, *, progress=None):
     """Reuse an identical native point or evaluate it in a fresh process.
 
@@ -61,39 +111,31 @@ def evaluate_native(physical, inventory, boron, sampling, path, directory, *, pr
             if progress:
                 progress(status="native_reused", native_pid=None, keff=state["result"]["combined_keff"])
             return state
-    case_path = directory / "case.json"
-    case_path.write_text(json.dumps(serializable(case), indent=2, allow_nan=False) + "\n")
-    environment = dict(os.environ, CORE_NATIVE_DIRECTORY=str(directory.resolve()),
-                       CORE_NATIVE_DRIVER=physical.native_driver,
-                       OMP_NUM_THREADS=str(sampling["threads"]),
-                       OPENBLAS_NUM_THREADS="1")
-    process = None
     started = time.perf_counter()
-    try:
-        with (directory / "native.log").open("w") as log:
-            process = subprocess.Popen([sys.executable, "-m", "coupling.native"], env=environment,
-                                       stdout=log, stderr=subprocess.STDOUT)
-            if progress:
-                progress(status="native_running", native_pid=process.pid, boron_mg_B10_per_kg=boron,
-                         transported_fuel_nuclides=len(case["material_response"]["nuclides"]))
-            print(f"OpenMC PID {process.pid}: {path.stem}, B={boron:.6g} mg B10/kg", flush=True)
-            code = process.wait()
-        if code:
-            raise RuntimeError(f"OpenMC failed ({code}); inspect {directory / 'native.log'}")
-        result = load_state(directory / "result.json")
-        state = {"case": case, "result": result,
-                 "fuel_inventory_atoms_cm3": np.asarray(inventory), "nuclides": physical.names,
-                 "fuel_labels": physical.labels}
-        save_state(path, state)
+
+    def launched(pid):
+        """Report the isolated inventory evaluation's process identity.
+
+        Parameters
+        ----------
+        pid : int
+            Native process ID.
+        """
         if progress:
-            progress(status="native_completed", native_pid=None, keff=result["combined_keff"],
-                     native_wall_s=time.perf_counter() - started)
-        print(f"  k={result['combined_keff'][0]:.6f} +/- {result['combined_keff'][1]:.6f}; {result['wall_s']:.1f} s", flush=True)
-        return state
-    finally:
-        if process is not None and process.poll() is None:
-            process.terminate()
-            process.wait()
+            progress(status="native_running", native_pid=pid, boron_mg_B10_per_kg=boron,
+                     transported_fuel_nuclides=len(case["material_response"]["nuclides"]))
+        print(f"OpenMC PID {pid}: {path.stem}, B={boron:.6g} mg B10/kg", flush=True)
+
+    result = run_native(case, directory, driver=physical.native_driver, on_start=launched)
+    state = {"case": case, "result": result,
+             "fuel_inventory_atoms_cm3": np.asarray(inventory), "nuclides": physical.names,
+             "fuel_labels": physical.labels}
+    save_state(path, state)
+    if progress:
+        progress(status="native_completed", native_pid=None, keff=result["combined_keff"],
+                 native_wall_s=time.perf_counter() - started)
+    print(f"  k={result['combined_keff'][0]:.6f} +/- {result['combined_keff'][1]:.6f}; {result['wall_s']:.1f} s", flush=True)
+    return state
 
 
 def main():

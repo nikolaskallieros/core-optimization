@@ -3,6 +3,7 @@
 import torch
 
 from geometry import CadGeometry, MaterialVolume, box, cylinder, union
+from geometry.channels import rectangular_centers
 
 
 def pin_centers(settings):
@@ -18,10 +19,7 @@ def pin_centers(settings):
     torch.Tensor
         Pin-by-coordinate centers in cm, with x varying fastest.
     """
-    nx, ny = settings["shape"]
-    px, py = settings["pitch_cm"]
-    return torch.tensor([[(i - (nx - 1) / 2) * px, (j - (ny - 1) / 2) * py]
-                         for j in range(ny) for i in range(nx)], dtype=torch.float64)
+    return rectangular_centers(settings["shape"], settings["pitch_cm"])
 
 
 def build_geometry(settings, radius_cm):

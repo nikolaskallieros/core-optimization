@@ -340,8 +340,29 @@ def _axial_edges(cad, subdivisions):
     return torch.cat(((edges[:-1, None] + edges.diff()[:, None] * weights).flatten(), edges[-1:]))
 
 
+def subdivide_intervals(edges, counts):
+    """Subdivide physical intervals while retaining their exact interfaces.
+
+    Parameters
+    ----------
+    edges : torch.Tensor
+        Increasing physical breakpoints in a common length unit.
+    counts : sequence of int
+        Number of cells within each adjacent breakpoint interval.
+
+    Returns
+    -------
+    torch.Tensor
+        Increasing mesh edges in the same unit, retaining breakpoint gradients.
+    """
+    pieces = [first + (second - first) * torch.arange(count, dtype=edges.dtype, device=edges.device) / count
+              for first, second, count in zip(edges[:-1], edges[1:], counts, strict=True)]
+    return torch.cat((*pieces, edges[-1:]))
+
+
 def discretize(cad, subdivisions=None, *, axial_subdivisions=1, max_size_cm=None,
-               curvature_segments=32, coordinates=None, volume_rtol=1e-10):
+               curvature_segments=32, coordinates=None, volume_rtol=1e-10,
+               cartesian_edges=None):
     """Derive a solver mesh and material mapping from one CAD geometry factory.
 
     Parameters
@@ -366,6 +387,9 @@ def discretize(cad, subdivisions=None, *, axial_subdivisions=1, max_size_cm=None
         Allowed relative material-volume error during coupled preparation for
         tetrahedral meshes. Declare this accuracy requirement in the case's mesh
         inputs and refine the mesh to meet it. Analytical cuts retain exact closure.
+    cartesian_edges : tuple of array_like or None, optional
+        Explicit x/y/z edges in cm for a box construction, replacing uniform
+        subdivisions. Their endpoints must match the physical CAD domain.
 
     Returns
     -------
@@ -394,6 +418,8 @@ def discretize(cad, subdivisions=None, *, axial_subdivisions=1, max_size_cm=None
     else:
         mesh = None
     initial = initial if isinstance(initial, CadGeometry) else CadGeometry.read_step(initial)
+    if cartesian_edges is not None and (initial.is_direct or initial.domain.kind != "box"):
+        raise ValueError("Explicit Cartesian edges require a box CAD construction")
     if initial.is_direct:
         if callable(cad):
             raise ValueError("Build the CAD solids first; supply an explicit coordinate map for shape gradients")
@@ -410,8 +436,14 @@ def discretize(cad, subdivisions=None, *, axial_subdivisions=1, max_size_cm=None
     initial_bounds = torch.stack((lower, upper)).detach().clone()
     if initial.domain.kind == "box":
         names = ("x_min", "x_max", "y_min", "y_max", "bottom", "top")
-        edges = tuple(lower[i] + (upper[i] - lower[i]) * torch.linspace(0., 1., n + 1, dtype=lower.dtype)
-                      for i, n in enumerate(subdivisions))
+        if cartesian_edges is None:
+            edges = tuple(lower[i] + (upper[i] - lower[i]) * torch.linspace(0., 1., n + 1, dtype=lower.dtype)
+                          for i, n in enumerate(subdivisions))
+        else:
+            edges = tuple(torch.as_tensor(value, dtype=lower.dtype) for value in cartesian_edges)
+            endpoints = torch.stack([value[[0, -1]] for value in edges]).T
+            if not torch.allclose(endpoints, initial_bounds, rtol=1e-12, atol=1e-12):
+                raise ValueError("Cartesian mesh endpoints differ from the physical CAD domain")
         grid = Grid3D(edges, tuple(initial.boundaries[name]["type"] for name in names))
     elif initial.domain.kind == "prism":
         vertices = initial.domain.parameters["vertices"]

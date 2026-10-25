@@ -200,6 +200,21 @@ class RegionalSurrogate(CalibratedDiffusion):
         return result
 
 
+class FreshFuelSurrogate(RegionalSurrogate):
+    """Steady-state regional diffusion driven by the live fresh-fuel composition."""
+
+    def forward(self):
+        """Update isotope-dependent cross sections and solve the fixed physical state.
+
+        Returns
+        -------
+        dict
+            Calibrated diffusion fields with derivatives through the caller's
+            fresh_densities callback. No inventory evolution is performed.
+        """
+        return super().forward(self.fresh_material_delta())
+
+
 @contextmanager
 def shared_geometry(points):
     """Reuse a live material partition across compatible response points.
