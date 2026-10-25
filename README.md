@@ -30,10 +30,27 @@ flowchart LR
 TOML supplies the dimensions, material properties, operating conditions and
 optimization goals. One shared **3D build123d geometry** assigns a material to each
 volume. GEOUNED converts its STEP solids into OpenMC's analytic surfaces and cells;
-Gmsh derives a numerical mesh for diffusion from those same solids. FreeCAD runs
-inside the converter; there is no separate FreeCAD model to maintain.
-Design updates feed the same geometry and material definitions. The current
-adapter limits are described under [Create your own design](#create-your-own-design).
+Gmsh supplies the diffusion mesh, with material mapping derived from the same
+geometry definition. FreeCAD runs inside the converter; there is no separate
+FreeCAD model to maintain.
+
+**WR-1 first builds a background mesh, then assigns properties to its cells:**
+
+1. Mesh the outer CAD sector with Gmsh and extend its triangles axially into prism cells.
+2. Calculate how much of each material lies inside each cell using analytical
+   intersections of the shared parametric geometry. For example, a cell crossing
+   a fuel–coolant interface could contain 30% fuel and 70% coolant by volume.
+3. Combine the material cross sections using those volume fractions to calculate
+   each cell's effective cross sections and diffusion coefficients, then solve diffusion.
+
+During optimization, changes to internal dimensions or material composition update
+the fractions and coefficients while the background mesh stays fixed. These updates
+remain differentiable in PyTorch. Changing the outer domain requires a new mesh.
+
+The direct 3D CAD adapter uses tetrahedral elements whose faces follow material
+interfaces to the mesh's geometric accuracy, with one material region per element.
+Its shape-derivative requirements and the current adapter limits are described under
+[Create your own design](#create-your-own-design).
 
 **One scalar objective. One backward pass. Derivatives for every selected design
 parameter.** PyTorch's [reverse-mode automatic differentiation](https://docs.pytorch.org/docs/2.7/notes/autograd.html)
