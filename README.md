@@ -9,9 +9,15 @@ and cycle duration together.
 
 The central idea is to **reuse one calibrated surrogate for several optimization
 steps**, then evaluate the proposed design with OpenMC and refresh the fit. Gradients
-connect a goal at discharge to the design decisions that shaped the entire fuel history.
+connect the objective to all selected design parameters, at a single state or
+through an entire fuel history.
 
-[WR-1 results](#wr-1-results) · [Performance](#recorded-performance) ·
+Start with a small lattice, scale to **490 independent enrichment variables**,
+then apply the same approach to **WR-1 fuel utilization over three depletion cycles**.
+
+[Small lattice](#small-lattice-a-complete-workflow) ·
+[490-variable enrichment study](#enrichment-shaping-490-design-variables) ·
+[WR-1 results](#wr-1-results) ·
 [Install](#install) · [Create your own design](#create-your-own-design)
 
 ## From transport calculations to design gradients
@@ -30,47 +36,108 @@ flowchart LR
 TOML supplies the dimensions, material properties, operating conditions and
 optimization goals. One shared **3D build123d geometry** assigns a material to each
 volume. GEOUNED converts its STEP solids into OpenMC's analytic surfaces and cells;
-Diffusion adapters derive meshes and material fractions from the same geometry
+diffusion adapters derive meshes and material fractions from the same geometry
 definition; Gmsh handles meshing of CAD solids and sector faces. FreeCAD runs
 inside the converter; there is no separate FreeCAD model to maintain.
-
-**WR-1 first builds a background mesh, then assigns properties to its cells:**
-
-1. Mesh the outer CAD sector with Gmsh and extend its triangles axially into prism cells.
-2. Calculate how much of each material lies inside each cell using analytical
-   intersections of the shared parametric geometry. For example, a cell crossing
-   a fuel–coolant interface could contain 30% fuel and 70% coolant by volume.
-3. Combine the material cross sections using those volume fractions to calculate
-   each cell's effective cross sections and diffusion coefficients, then solve diffusion.
-
-During optimization, changes to internal dimensions or material composition update
-the fractions and coefficients while the background mesh stays fixed. These updates
-remain differentiable in PyTorch. Changing the outer domain requires a new mesh.
-
-The direct 3D CAD adapter uses tetrahedral elements whose faces follow material
-interfaces to the mesh's geometric accuracy, with one material region per element.
-Its shape-derivative requirements and the current adapter limits are described under
-[Create your own design](#create-your-own-design).
 
 **One scalar objective. One backward pass. Derivatives for every selected design
 parameter.** PyTorch's [reverse-mode automatic differentiation](https://docs.pytorch.org/docs/2.7/notes/autograd.html)
 computes these derivatives together, without a separate perturbed transport run for
-each parameter. The WR-1 studies use this same approach for both 12-variable and
-33-variable designs.
+each parameter. The examples below use this approach for one radius, 490 enrichment
+variables, and coupled WR-1 geometry, composition and fuel-cycle decisions.
 
-- **Optimize across the fuel history.** Differentiate through diffusion, depletion,
-  residence time and fuel movement to improve an end-of-residence objective.
 - **Keep transport in the loop.** Fit material cross-section and diffusion corrections
   to OpenMC reference states; evaluate selected candidates with OpenMC before acceptance.
+- **Optimize across the fuel history.** Differentiate through diffusion, depletion,
+  residence time and fuel movement to improve an end-of-residence objective.
 - **Reuse the engine for another case.** Supply geometry, materials, operating conditions
   and goals. Calibration, gradients, fuel-history execution and optimization live in
   the shared library.
 
+## Small lattice: a complete workflow
+
+The first example makes the entire process visible in a **3 × 3 pin lattice**.
+Build the geometry once, run OpenMC, calibrate diffusion, optimize the common fuel
+radius, and verify the updated design with a new OpenMC history. The objective
+is **k-effective = 1 at the end of ten days**.
+
+| Quantity | Initial lattice | Selected lattice |
+| --- | ---: | ---: |
+| Common fuel radius (cm) | 0.4500 | **0.4861** |
+| End-of-history OpenMC k-effective | 0.92708 ± 0.00106 | **1.00006 ± 0.00103** |
+
+The complete local workflow took **85 seconds with two OpenMC threads**. It uses
+manufactured one-group cross sections and a four-isotope depletion chain, so it
+runs without downloading nuclear data.
+
+![Nine-pin lattice: initial and optimized geometry, with OpenMC and calibrated diffusion histories.](designs/small_lattice/results/lattice_optimization/optimization_step_1/figures/workflow.png)
+
+*One geometry definition supplies both solvers. Changing the radius changes
+material fractions, fuel inventory and the depletion history; OpenMC checks the
+resulting end-of-history target.*
+
+[Run the small lattice](designs/small_lattice/README.md) after following the
+[installation instructions](#install).
+
+## Enrichment shaping: 490 design variables
+
+Next, keep the geometry fixed and optimize the fuel composition in a **7 × 7
+lattice with ten axial segments per pin**. Each of the **490 segments has its own
+enrichment variable**, starting at 4 wt% U-235 with 2–5 wt% bounds. The objective
+is to flatten the three-dimensional power distribution while preserving both
+the original U-235 inventory and reference k-effective. Evaluated nuclear data
+support fresh-fuel transport calculations, without depletion.
+
+**The selected design reduces peak/average fuel power density by 19.0%.**
+
+| OpenMC result | Initial lattice | Selected design |
+| --- | ---: | ---: |
+| Peak / average fuel power density | 1.992 | **1.614** |
+| k-effective ± 1 standard error | 0.99008 ± 0.00081 | **0.98987 ± 0.00090** |
+| Enrichment range (wt% U-235 within uranium) | 4.00 everywhere | **2.75–5.00** |
+| Total U-235 inventory (kg) | 9.598277 | **9.598277** |
+
+The preserved reference is slightly subcritical, **k = 0.99008**. Each diffusion
+search enforces that k and the original inventory as equalities. OpenMC acceptance
+allows an absolute k difference of 0.005, including two combined standard errors.
+
+This is where obtaining all parameter derivatives together becomes especially
+useful. At the uniform reference, a diffusion evaluation took **1.84 seconds**,
+followed by **0.061 seconds for all 490 objective sensitivities in one backward
+pass**, measured locally with four CPU threads. The k and inventory constraints
+each use a separate backward pass through the same forward solution.
+
+Each calibration supports up to **80 diffusion optimizer iterations** before
+another OpenMC evaluation. The best feasible improvement is proposed; only a
+design that improves native power and passes the constraints becomes the next
+starting point. Ten verification rounds produced four accepted updates.
+
+![Enrichment optimization: accepted OpenMC power peaks, rejected trials, k constraints and diffusion search histories.](designs/enrichment_shaping/results/power_shaping/optimization_step_1/figures/optimization_progress.png)
+
+*The accepted power peak decreases while rejected trials remain visible. Stars
+mark the feasible diffusion iterates selected for OpenMC verification.*
+
+![The 490 selected enrichments, shown as a seven-by-seven pin map at each of ten axial elevations.](designs/enrichment_shaping/results/power_shaping/optimization_step_1/figures/enrichment.png)
+
+*Each square is an independent enrichment variable. The optimizer redistributes
+fuel composition radially and axially while retaining the same fissile inventory.*
+
+[Power profiles, complete results and reproduction commands](designs/enrichment_shaping/README.md)
+include all native evaluations. The selected design is round 5; five subsequent
+smaller-step trials did not improve its native power peak, reaching the configured
+local stopping limit.
+
 ## WR-1 results
 
-The WR-1 studies exercise the workflow on a **35 MW core with 37 fuel channels**,
-three axial assemblies per channel and a three-cycle fuel residence. They show both
-what the optimizer changes and how those changes perform in subsequent OpenMC evaluations.
+The final example applies the method to a reactor-scale fuel-utilization problem:
+**a 35 MW core with 37 fuel channels**, three axial assemblies per channel and a
+three-cycle fuel residence. Optimize geometry, enrichment and cycle duration
+together to increase discharge burnup and improve channel-power distributions.
+
+Here, each design change propagates through **neutron diffusion, isotope depletion
+and fuel movement across all three cycles**. Gradients connect the discharge
+objective to the decisions that shaped the entire fuel history. Subsequent OpenMC
+histories check the proposed designs, including their changing k-effective and power.
 
 ### Optimization 1: more burnup, more uniform channel power
 
@@ -168,9 +235,9 @@ numerical criteria passed. The figures demonstrate the method; they do not estab
 experimental validation or a global optimum. [Reproduction notes](designs/wr_1/README.md#reproducibility)
 describe the historical runs and current replay limitations.
 
-## Recorded performance
+### Recorded performance
 
-For step 1, a coupled surrogate history averaged **4.1 minutes**, and the backward
+For WR-1 step 1, a coupled surrogate history averaged **4.1 minutes**, and the backward
 pass for all 12 design derivatives averaged **5.0 minutes**. One OpenMC reference
 history took approximately **one hour**. Reusing a fit lets the optimizer take
 several design steps between those transport histories.
@@ -234,38 +301,15 @@ GEOUNED is pinned because its maintainers identify incorrect conversions in
 Installation has been checked on Apple Silicon macOS; Linux
 installation has not yet been verified.
 
-**Run your first geometry optimization without downloading nuclear data:**
-
-```sh
-.venv/bin/python -m designs.slab.run
-```
-
-The [slab tutorial](designs/slab/README.md) adjusts its width from **20.000 cm to
-about 8.631 cm** to reach **k-effective = 1.000000**, using manufactured one-group
-cross sections. It demonstrates inputs → CAD → diffusion → gradients → optimization
-with one input file and one short script, and writes its final CAD to
-`runs/slab/geometry.step`.
-
-For the complete local workflow, run the [nine-pin lattice demonstration](designs/small_lattice/README.md):
+**Run the small-lattice workflow without downloading nuclear data:**
 
 ```sh
 .venv/bin/python -m designs.small_lattice.scripts.run_optimization
 ```
 
-It adds actual OpenMC transport, a ten-day depletion history, material calibration,
-radius optimization and a new OpenMC verification. Manufactured cross sections
-keep the demonstration self-contained; no evaluated nuclear-data download is needed.
-
-The [pin and axial enrichment study](designs/enrichment_shaping/README.md) uses
-evaluated nuclear data and **490 enrichment variables** to shape a 7 × 7 lattice's
-power distribution, without depletion. Its native reference, cross-section fit
-and derivative checks use the same shared geometry. It changes enrichments at
-fixed geometry and U-235 inventory while preserving the reference k-effective.
-OpenMC verification selected a design with peak/average fuel power density
-reduced from **1.992 to 1.614 (19.0%)**. Each new search starts from the last
-accepted design; rejected trials preserve that result. The design page includes
-all ten verification rounds, progress curves and before/after power and
-enrichment maps.
+For the 490-variable study, follow the [enrichment-shaping instructions](designs/enrichment_shaping/README.md).
+Its data-preparation command downloads about 21 MB of selected evaluated isotope
+and water thermal-scattering tables.
 
 Full WR-1 runs require evaluated nuclear data and at least 10 GiB of free space
 for preparation. Follow the [WR-1 running instructions](designs/wr_1/README.md#nuclear-data-and-running-a-scenario).
@@ -294,8 +338,8 @@ license has not yet been selected.
 
 ## Create your own design
 
-Use the small lattice as a complete workflow template, following the same directory
-roles as WR-1. The slab tutorial above is a smaller introduction to the solver alone.
+Use the [small lattice](designs/small_lattice/README.md) as a complete workflow
+template, following the same directory roles as WR-1.
 
 ```sh
 cp -R designs/small_lattice designs/my_case
@@ -355,6 +399,27 @@ not differentiable. WR-1 and the slab tutorial retain their shared analytical
 parameterizations for exact moving-interface or dimension derivatives. They
 build actual CAD for OpenMC from the same parameters.
 
+<details>
+<summary>How WR-1 assigns material properties to the diffusion mesh</summary>
+
+**WR-1 first builds a background mesh, then assigns properties to its cells:**
+
+1. Mesh the outer CAD sector with Gmsh and extend its triangles axially into prism cells.
+2. Calculate how much of each material lies inside each cell using analytical
+   intersections of the shared parametric geometry. For example, a cell crossing
+   a fuel–coolant interface could contain 30% fuel and 70% coolant by volume.
+3. Combine the material cross sections using those volume fractions to calculate
+   each cell's effective cross sections and diffusion coefficients, then solve diffusion.
+
+During optimization, changes to internal dimensions or material composition update
+the fractions and coefficients while the background mesh stays fixed. These updates
+remain differentiable in PyTorch. Changing the outer domain requires a new mesh.
+
+The direct 3D CAD adapter uses tetrahedral elements whose faces follow material
+interfaces to the mesh's geometric accuracy, with one material region per element.
+
+</details>
+
 The OpenMC adapter accepts analytic planes, cylinders, cones, spheres and
 axis-aligned tori, including supported Boolean/nonconvex solids. It rejects
 splines, tilted tori and uncertain GEOUNED decompositions instead of approximating
@@ -362,6 +427,18 @@ them. Boundary conditions must cover an entire native surface; a surface shared
 by exterior and internal patches is rejected. Direct tetrahedral diffusion
 currently supports vacuum and reflective boundaries; WR-1's sector adapter also
 supports its periodic planes.
+
+For a minimal introduction to the solver, the [slab tutorial](designs/slab/README.md)
+uses one input file and one short script:
+
+```sh
+.venv/bin/python -m designs.slab.run
+```
+
+It adjusts the slab width from **20.000 cm to about 8.631 cm** to reach
+**k-effective = 1.000000** with manufactured one-group cross sections, demonstrating
+inputs → CAD → diffusion → gradients → optimization. The final CAD is written to
+`runs/slab/geometry.step`.
 
 Your case belongs in `designs/`. Shared packages live directly under `src/`;
 adding a new design does not require copying their numerical engines.
