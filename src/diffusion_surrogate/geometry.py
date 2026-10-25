@@ -1,9 +1,9 @@
 """Shared geometry descriptions and physical-to-mesh mappings."""
 from dataclasses import dataclass
-import math
 from typing import Callable
 
-import numpy as np
+import torch
+from geometry.intersections import circle_triangle_area
 
 
 @dataclass(frozen=True)
@@ -21,6 +21,11 @@ class DiffusionGeometry:
     identity : object or None, optional
         Comparable identity of the mesh and mapping, enabling reuse across native states
         with the same live design. None disables shared-geometry caching.
+    volume_rtol : float, optional
+        Declared relative mesh-volume error allowed by coupled case preparation.
+        The default retains exact analytical volume closure. Curved tetrahedral
+        meshes need an explicit tolerance justified by mesh refinement; this
+        never rescales physical material volumes or densities.
 
     Notes
     -----
@@ -33,6 +38,7 @@ class DiffusionGeometry:
     fractions: Callable
     region_labels: tuple[str, ...]
     identity: object | None = None
+    volume_rtol: float = 1e-10
 
 
 class GeometryInputError(ValueError):
@@ -61,21 +67,6 @@ def circle_polygon_area(center, radius, vertices):
     Circular arcs and straight chords are integrated separately. This geometry calculation
     introduces no transport-volume correction or density scaling.
     """
-    points = np.asarray(vertices, dtype=float)-np.asarray(center, dtype=float)
-    area = 0.
-    for first, second in zip(points, np.roll(points, -1, axis=0)):
-        delta = second-first
-        qa, qb, qc = float(delta@delta), 2*float(first@delta), float(first@first)-radius*radius
-        cuts = [0., 1.]
-        discriminant = qb*qb-4*qa*qc
-        if discriminant > 0:
-            root = math.sqrt(discriminant)
-            cuts += [t for t in ((-qb-root)/(2*qa), (-qb+root)/(2*qa)) if 0 < t < 1]
-        cuts.sort()
-        for lower, upper in zip(cuts[:-1], cuts[1:]):
-            left, right = first+lower*delta, first+upper*delta
-            cross = float(left[0]*right[1]-left[1]*right[0])
-            middle = first+(lower+upper)/2*delta
-            area += (cross/2 if middle@middle < radius*radius
-                     else radius*radius*math.atan2(cross, float(left@right))/2)
-    return abs(area)
+    return float(circle_triangle_area(torch.as_tensor(vertices, dtype=torch.float64)[None],
+                                      torch.as_tensor(center, dtype=torch.float64),
+                                      torch.as_tensor(radius, dtype=torch.float64)).abs()[0])

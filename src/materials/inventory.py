@@ -66,7 +66,7 @@ class IsotopicInventory:
     def __init__(self, *, case_factory, recipe, settings, chain_path, cross_sections,
                  design_values=None, aliases=None, chain_sha256=None, kernel_cache=None,
                  physical_inventory_response=True,
-                 native_driver="diffusion_surrogate.openmc_cylinders:run"):
+                 native_driver="coupling.openmc:run"):
         """Bind a full depletion chain to explicit case and recipe interfaces.
 
         Parameters

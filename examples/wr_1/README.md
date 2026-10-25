@@ -3,14 +3,16 @@
 This example defines WR-1 geometry, material choices, operating scenarios and
 optimization goals. Native transport, inventory handling, cycle replay,
 calibration, optimization and plotting are provided by the packages in `src/`.
-The model declares cylinder locations and materials; the library assembles
-native regions, displaces background material and computes live mesh fractions.
+The model declares channel locations and materials. A small geometry builder
+creates the shared CAD; the library converts it to native cells and computes
+live diffusion mesh fractions.
 See the [project README](../../README.md) for installation.
 
 | Location | Purpose |
 | --- | --- |
 | `model/case.py` | Connect a scenario to `CaseModel` and `CycleCase` |
-| `model/geometry.py`, `graphite.py`, `sleeves.py` | WR-1 geometry, adjustable dimensions and native-to-diffusion mapping |
+| `build_geometry.py` | One shared geometry definition and an entry point to export the CAD |
+| `model/design.py`, `graphite.py`, `sleeves.py` | WR-1 design variables and physical choices |
 | `model/materials.py`, `data.py` | Fuel recipe, isotope substitutions and evaluated-data selection |
 | `model/calibration.py` | Regional fitting groups, material-response bindings and observation weights |
 | `inputs/study.toml` | Commented operating settings, optimization goals and six labeled scenarios |
@@ -97,14 +99,28 @@ are defined once. Missing or circular references fail during loading.
 `model.toml` owns the physical definitions shared by the six scenarios. Model
 functions consume the resolved values without rereading files or supplying a
 second set of case defaults. Preparation writes `resolved_inputs.json`, `case.json`,
-OpenMC XML and readable resolved inputs into `prepared/`. These are generated records of the
+`geometry.step`, OpenMC XML and readable resolved inputs into `prepared/`. These are generated records of the
 inputs used; edit the source TOML to change a case. Inputs changed after loading
 require a reload, and a different scenario or changed sources require a new run.
 
 The default surrogate uses the same physical regions, dimensions and boundary
-conditions as the native OpenMC model. `model/geometry.py` constructs its
-`DiffusionGeometry`; preparation and calibration select that mapping through
-`CaseModel`. Calibration receives the selected mapping and changes material
+conditions as the native OpenMC model. `build_geometry.py` builds the material
+solids from the resolved design. The shared OpenMC adapter converts those actual
+solids through STEP and GEOUNED, with FreeCAD isolated in `.geouned`.
+The WR-1 diffusion adapter retains the live analytical parameterization of those
+same solids: Gmsh meshes the sector face, and exact circle/polygon intersections
+preserve derivatives of channel positions, radii and sleeve thicknesses.
+The prepared STEP contains actual build123d solids, material identities and
+boundary faces. Saved STEP inputs are fixed; optimization uses live parameters.
+
+To export just the CAD for inspection, set `STEP` in `build_geometry.py` and run:
+
+```sh
+.venv/bin/python -m examples.wr_1.build_geometry
+```
+
+Preparation and calibration select the resulting `DiffusionGeometry` through
+`CaseModel`. Calibration receives that mapping and changes material
 coefficients, without creating a separate geometry. A different physical layout
 requires an explicit `surrogate_mesh` override and a new fit. Both mappings retain
 the same region labels and represented material volumes.

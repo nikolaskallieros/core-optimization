@@ -9,6 +9,8 @@ import math
 
 import torch
 
+from geometry.intersections import circle_fractions
+
 DTYPE = torch.float64
 
 
@@ -26,58 +28,6 @@ def tensor(value):
         Float64 tensor with the input's shape.
     """
     return torch.as_tensor(value, dtype=DTYPE)
-
-
-def _quarter_area(x, y):
-    """Integrate the unit disk over signed rectangular limits.
-
-    Parameters
-    ----------
-    x : torch.Tensor
-        Dimensionless signed x limits, broadcast with y.
-    y : torch.Tensor
-        Dimensionless signed y limits, broadcast with x.
-
-    Returns
-    -------
-    torch.Tensor
-        Signed disk area between the origin and each pair of limits.
-    """
-    sx, sy = torch.where(x < 0, -1., 1.), torch.where(y < 0, -1., 1.)
-    a, b = (sx*x).clamp(max=1.), (sy*y).clamp(max=1.)
-    # Finite derivatives at tangencies; the 1e-14 floor changes area only at
-    # roundoff and avoids 0*infinity from differentiating sqrt(0).
-    ra, rb = (1-a*a).clamp_min(1e-28).sqrt(), (1-b*b).clamp_min(1e-28).sqrt()
-    outside = .5*(a*ra+b*rb+torch.atan2(a, ra)+torch.atan2(b, rb)-math.pi/2)
-    return sx*sy*torch.where(a*a+b*b <= 1., a*b, outside)
-
-
-def circle_fractions(x_edges, y_edges, centers, radii):
-    """Compute analytical circle intersections with Cartesian cells.
-
-    Parameters
-    ----------
-    x_edges : torch.Tensor
-        Increasing x-cell edges in cm.
-    y_edges : torch.Tensor
-        Increasing y-cell edges in cm.
-    centers : torch.Tensor
-        Cylinder centers in cm with shape (n_cylinders, 2).
-    radii : torch.Tensor
-        Cylinder radii in cm with shape (n_cylinders,).
-
-    Returns
-    -------
-    torch.Tensor
-        Circle area fractions with shape (ny * nx, n_cylinders), in row-major y/x cell
-        order.
-    """
-    x = (x_edges[None, :, None]-centers[:, None, 0:1])/radii[:, None, None]
-    y = (y_edges[None, None, :]-centers[:, None, 1:2])/radii[:, None, None]
-    primitive = _quarter_area(x, y)*radii[:, None, None]**2
-    area = primitive[:, 1:, 1:]-primitive[:, :-1, 1:]-primitive[:, 1:, :-1]+primitive[:, :-1, :-1]
-    cell_area = torch.diff(x_edges)[:, None]*torch.diff(y_edges)[None, :]
-    return (area/cell_area).permute(2, 1, 0).reshape(-1, len(radii)).clamp(0., 1.)
 
 
 @dataclass

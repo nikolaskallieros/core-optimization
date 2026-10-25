@@ -12,6 +12,7 @@ dependencies = [
   "numpy>=2,<3", "scipy>=1.15,<2", "torch>=2.7,<2.8", "openmc==0.16.0",
   "h5py>=3.11", "matplotlib>=3.9", "pandas>=2.2", "lxml>=5",
   "uncertainties>=3.2",
+  "build123d>=0.11.1,<0.12", "gmsh>=4.15.2,<4.16",
 ]
 
 [project.optional-dependencies]

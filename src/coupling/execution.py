@@ -57,8 +57,8 @@ def prepare_case(case):
         volumes = None if mesh is None else (mesh.fractions().T @ mesh.grid.volumes).numpy()
     if volumes is not None:
         expected = np.asarray([region["volume_cm3"] for region in native["regions"]])
-        if not np.allclose(volumes, expected, rtol=1e-10, atol=1e-8):
-            raise ArithmeticError("Native and surrogate region volumes differ")
+        if not np.allclose(volumes, expected, rtol=mesh.volume_rtol, atol=1e-8):
+            raise ArithmeticError(f"Native and surrogate region volumes differ beyond volume_rtol={mesh.volume_rtol:g}")
     if "fresh_fuel_mass" in options:
         from optimization.fuel_constraints import native_fuel_mass_check
         if not native_fuel_mass_check(native, options["fresh_fuel_mass"])["passed"]:

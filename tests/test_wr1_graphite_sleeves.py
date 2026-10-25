@@ -12,11 +12,12 @@ import numpy as np
 import torch
 
 from diffusion_surrogate.hexagonal import C6Grid
-from examples.wr_1.model.geometry import fractions as wr1_fractions
+from geometry.diffusion import material_fractions
+from examples.wr_1.build_geometry import parameterized_geometry
 from examples.wr_1.model.case import study
 from coupling.optimization import project
 from optimization.design import set_parameters
-from diffusion_surrogate.openmc_cylinders import build
+from coupling.openmc import build
 from runtime.io import load_state, save_state
 
 ROOT = WR1_ROOT
@@ -54,7 +55,7 @@ class GraphiteSleeveTests(unittest.TestCase):
     def test_exact_partition_and_independent_analytic_thickness_derivatives(self):
         """Verify exact partition and independent analytic thickness derivatives."""
         grid = C6Grid(self.case["geometry"]["apothem_cm"], 8, [0., 99., 198., 297.])
-        volumes = grid.volumes @ wr1_fractions(grid, self.design, self.case)
+        volumes = grid.volumes @ material_fractions(parameterized_geometry(self.design, self.case), grid)
         np.testing.assert_allclose(volumes.detach(), [r["volume_cm3"] for r in self.case["regions"]], rtol=2e-10, atol=1e-6)
         carbon = [(i, r) for i, r in enumerate(self.case["regions"]) if r.get("graphite_sleeve")]
         for j, (i, region) in enumerate(carbon):
@@ -76,13 +77,23 @@ class GraphiteSleeveTests(unittest.TestCase):
         set_parameters(self.design, values)
         old = self.base.design(); set_parameters(old, self.base_values)
         grid = C6Grid(case["geometry"]["apothem_cm"], 8, [0., 99., 198., 297.])
-        torch.testing.assert_close(wr1_fractions(grid, self.design, case), wr1_fractions(grid, old, before))
+        torch.testing.assert_close(material_fractions(parameterized_geometry(self.design, case), grid), material_fractions(parameterized_geometry(old, before), grid))
 
     def test_native_cells_respect_top_middle_bottom_thicknesses(self):
         """Verify native cells respect top middle bottom thicknesses."""
         self.workflow.work.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(dir=self.workflow.work) as directory:
             model, _ = build(self.case, directory)
+            import build123d as bd
+            from geometry import CadGeometry
+            step = Path(directory) / "geometry.step"
+            imported = CadGeometry.read_step(step)
+            self.assertTrue(imported.is_direct)
+            self.assertEqual([volume.label for volume in imported.volumes],
+                             [region["label"] for region in self.case["regions"]])
+            np.testing.assert_allclose([volume.shape.volume / 1000 for volume in imported.volumes],
+                                       [region["volume_cm3"] for region in self.case["regions"]],
+                                       rtol=1e-9, atol=2e-8)
             cells = list(model.geometry.get_all_cells().values())
             centre = self.design.channel_ids.index("E8")
             radius = float(self.design()["sleeve_inner_radius_mm"][centre].detach())/10

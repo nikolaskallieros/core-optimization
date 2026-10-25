@@ -4,8 +4,11 @@ import tomllib
 
 import torch
 
-from diffusion_surrogate import Diffusion3D, Grid3D
+from diffusion_surrogate import Diffusion3D
+from geometry import CadGeometry, MaterialVolume, box
+from geometry.diffusion import discretize
 from optimization.solvers import minimize
+from runtime.paths import RUNS
 
 INPUTS = Path(__file__).with_name("model.toml")
 DTYPE = torch.float64
@@ -24,6 +27,7 @@ class Slab(torch.nn.Module):
         """
         super().__init__()
         geometry, material = settings["geometry"], settings["material"]
+        self.geometry_settings = geometry
         self.cells = geometry["cells"]
         self.lower, self.upper = geometry["width_bounds_cm"]
         initial = geometry["initial_width_cm"]
@@ -53,6 +57,29 @@ class Slab(torch.nn.Module):
         """
         return self.lower + (self.upper - self.lower) * torch.sigmoid(self.coordinate)
 
+    def geometry(self, width=None):
+        """Build the single parametric CAD definition for both solver adapters.
+
+        Parameters
+        ----------
+        width : torch.Tensor or None, optional
+            Live width in cm; None evaluates the current design parameter.
+
+        Returns
+        -------
+        CadGeometry
+            Build123d box with the TOML material and face boundary assignments.
+        """
+        width = self.width_cm if width is None else width
+        settings = self.geometry_settings
+        upper = torch.stack((width, *width.new_tensor(settings["transverse_size_cm"])))
+        domain = box(torch.zeros_like(upper), upper)
+        faces = ("x_min", "x_max", "y_min", "y_max", "bottom", "top")
+        boundaries = {name: {"type": condition, "slot": i}
+                      for i, (name, condition) in enumerate(zip(faces, settings["boundaries"]))}
+        material = settings["material"]
+        return CadGeometry(domain, (MaterialVolume(material, material, domain),), boundaries, "slab")
+
     def forward(self):
         """Build the live geometry and solve its one-group diffusion problem.
 
@@ -62,11 +89,8 @@ class Slab(torch.nn.Module):
             Solver responses including keff, plus the live width_cm tensor.
         """
         width = self.width_cm
-        x = torch.linspace(0., 1., self.cells + 1, dtype=DTYPE) * width
-        grid = Grid3D((x, [0., 1.], [0., 1.]),
-                      ("vacuum", "vacuum", "reflective", "reflective", "reflective", "reflective"))
-        fractions = torch.ones((grid.size, 1), dtype=DTYPE)
-        result = Diffusion3D(grid).solve(fractions, self.macro)
+        mesh = discretize(self.geometry(width), (self.cells, 1, 1))
+        result = Diffusion3D(mesh.grid).solve(mesh.fractions(), self.macro)
         return {**result, "width_cm": width}
 
 
@@ -97,6 +121,7 @@ def run(inputs=INPUTS):
                       optimizer=optimizer, keep_best=True)
     with torch.no_grad():
         final = model()
+    model.geometry().write_step(RUNS / "slab/geometry.step")
     return {"initial_width_cm": float(initial["width_cm"].detach()),
             "initial_keff": float(initial["keff"].detach()),
             "initial_dkeff_dwidth_per_cm": float(sensitivity),

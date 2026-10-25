@@ -18,12 +18,22 @@ connect a goal at discharge to the design decisions that shaped the entire fuel 
 
 ```mermaid
 flowchart LR
-    A[OpenMC reference] --> B[Calibrate cross sections]
-    B --> C[Optimize with PyTorch]
-    C --> D[Evaluate with OpenMC]
-    C -->|Next design step| C
-    D -->|Refresh fit| B
+    A["TOML inputs<br/>Geometry, properties and goals"] --> B["Shared 3D model<br/>build123d geometry and materials"]
+    B -->|STEP → GEOUNED| C[OpenMC analytic geometry]
+    B -->|Mesh and material mapping| D[Diffusion surrogate]
+    C -->|Calibrate cross sections| D
+    D --> E[Optimize with PyTorch]
+    A -->|Objectives and bounds| E
+    E -->|Updated design| B
 ```
+
+TOML supplies the dimensions, material properties, operating conditions and
+optimization goals. One shared **3D build123d geometry** assigns a material to each
+volume. GEOUNED converts its STEP solids into OpenMC's analytic surfaces and cells;
+Gmsh derives a numerical mesh for diffusion from those same solids. FreeCAD runs
+inside the converter; there is no separate FreeCAD model to maintain.
+Design updates feed the same geometry and material definitions. The current
+adapter limits are described under [Create your own example](#create-your-own-example).
 
 **One scalar objective. One backward pass. Derivatives for every selected design
 parameter.** PyTorch's [reverse-mode automatic differentiation](https://docs.pytorch.org/docs/2.7/notes/autograd.html)
@@ -169,6 +179,9 @@ constraint gradients can require additional backward passes.
 | --- | --- |
 | [OpenMC](https://docs.openmc.org/en/stable/) | Monte Carlo reference transport, fluxes, reaction rates and candidate evaluation |
 | [PyTorch](https://docs.pytorch.org/docs/2.7/index.html) | Automatic differentiation and gradient-based optimization |
+| [build123d](https://build123d.readthedocs.io/) | Parametric CAD solids and named material volumes shared by both solvers |
+| [GEOUNED](https://geouned-org.github.io/GEOUNED/dev/) and [FreeCAD](https://www.freecad.org/) | STEP-to-CSG conversion for OpenMC, preserving supported analytic surfaces |
+| [Gmsh](https://gmsh.info/) | Conformal tetrahedral meshes of 3D CAD solids and triangular meshes for the WR-1 sector |
 | [NJOY2016](https://github.com/njoy/NJOY2016) | Evaluated nuclear-data processing at the requested temperatures |
 | [NumPy](https://numpy.org/), [SciPy](https://scipy.org/) and [h5py](https://www.h5py.org/) | Arrays, sparse numerical methods and HDF5 data |
 | [Matplotlib](https://matplotlib.org/) | Geometry, power-history and optimization plots |
@@ -180,11 +193,19 @@ From a checkout, with [micromamba installed](https://mamba.readthedocs.io/en/lat
 ```sh
 micromamba --no-rc create -y -p "$PWD/.venv" -f environment.yml
 micromamba run -p "$PWD/.venv" python -m pip install -e '.[test]'
+micromamba --no-rc create -y -p "$PWD/.geouned" -f environment-geouned.yml
 micromamba run -p "$PWD/.venv" python tests/check_installation.py
 ```
 
 The environment includes Python 3.12, OpenMC 0.16.0, PyTorch 2.7 and NJOY with their
-native libraries. Installation has been checked on Apple Silicon macOS; Linux
+native libraries. The package installation adds build123d 0.11 and Gmsh 4.15.
+The separate `.geouned` environment contains GEOUNED 1.6.2 and FreeCAD 1.0.0;
+the adapter invokes it automatically. This isolates FreeCAD's native libraries
+from the solver environment. Set `GEOUNED_PYTHON` to the converter's Python path
+when running outside the checkout or using another environment location.
+GEOUNED is pinned because its maintainers identify incorrect conversions in
+[versions 1.6.3 and 1.6.4](https://github.com/GEOUNED-org/GEOUNED#geouned).
+Installation has been checked on Apple Silicon macOS; Linux
 installation has not yet been verified.
 
 **Run your first geometry optimization without downloading nuclear data:**
@@ -195,8 +216,9 @@ installation has not yet been verified.
 
 The [slab tutorial](examples/slab/README.md) adjusts its width from **20.000 cm to
 about 8.631 cm** to reach **k-effective = 1.000000**, using manufactured one-group
-cross sections. It demonstrates inputs → geometry → diffusion → gradients → optimization
-with one input file and one short script.
+cross sections. It demonstrates inputs → CAD → diffusion → gradients → optimization
+with one input file and one short script, and writes its final CAD to
+`runs/slab/geometry.step`.
 
 Full WR-1 runs require evaluated nuclear data and at least 10 GiB of free space
 for preparation. Follow the [WR-1 running instructions](examples/wr_1/README.md#nuclear-data-and-running-a-scenario).
@@ -234,8 +256,10 @@ cp -R examples/slab examples/my_case
 
 1. **Describe the case.** Put dimensions, material data, parameter bounds and goals
    in `model.toml`, the single source of truth for the example.
-2. **Connect the geometry.** Build the mesh and material fractions from live Torch
-   tensors in `run.py`, so derivatives reach the dimensions you want to optimize.
+2. **Define the geometry once.** Build solids with build123d in a small
+   `build_geometry.py` script. Bind region names, materials and boundary faces with
+   `CadGeometry.from_solids(...)`. Shared adapters generate OpenMC cells and a
+   diffusion mesh from those actual solids.
 3. **Choose a scalar objective.** Use solver responses such as k-effective or power
    to define the goal; the shared optimizer handles differentiation and updates.
 4. **Add OpenMC and a fuel history when needed.** The
@@ -247,12 +271,52 @@ Native and surrogate models **share the physical geometry by default**. A simple
 surrogate layout is an explicit choice through `surrogate_mesh`, with material
 identities and volumes checked. Calibration remains at the material-coefficient level.
 
+For example, the geometry interfaces accept a curved solid directly:
+
+```python
+import build123d as bd
+from geometry import CadGeometry
+from geometry.diffusion import discretize
+from geometry.openmc import from_cad
+from diffusion_surrogate import FiniteElementDiffusion
+
+solid = bd.Solid.make_sphere(40)  # build123d dimensions are in mm
+cad = CadGeometry.from_solids({"fuel": solid})  # unselected exterior: vacuum
+mesh = discretize(cad, max_size_cm=0.75)
+solver = FiniteElementDiffusion(mesh.grid)
+native = from_cad(cad, {"fuel": openmc_material})
+# solver.solve(mesh.fractions(), regional_macroscopic_data)
+```
+
+TOML is the editable source. The generated `geometry.step` stores the actual
+solids, material identities and boundary selections. Both adapters can read it
+for a fixed design; it does not store an autograd graph.
+
+**Geometry and derivatives are separate interfaces.** Direct solids use a
+tetrahedral finite-element diffusion solver, with differentiable material
+coefficients. For a coupled case, declare the allowed material-volume error with
+`volume_rtol` in the mesh inputs and refine until preparation passes; physical CAD
+volumes and densities are retained. Shape derivatives require an explicit Torch map of mesh-node
+coordinates, keeping the nodes on the updated CAD geometry; remeshing itself is
+not differentiable. WR-1 and the slab tutorial retain their shared analytical
+parameterizations for exact moving-interface or dimension derivatives. They
+build actual CAD for OpenMC from the same parameters.
+
+The OpenMC adapter accepts analytic planes, cylinders, cones, spheres and
+axis-aligned tori, including supported Boolean/nonconvex solids. It rejects
+splines, tilted tori and uncertain GEOUNED decompositions instead of approximating
+them. Boundary conditions must cover an entire native surface; a surface shared
+by exterior and internal patches is rejected. Direct tetrahedral diffusion
+currently supports vacuum and reflective boundaries; WR-1's sector adapter also
+supports its periodic planes.
+
 Your case belongs in `examples/`. Shared packages live directly under `src/`;
 adding a new example does not require copying their numerical engines.
 
 | Package | Responsibility |
 | --- | --- |
-| [`diffusion_surrogate`](src/diffusion_surrogate/) | Diffusion solvers, geometry mappings and cross-section calibration |
+| [`geometry`](src/geometry/) | Parametric CAD, material volumes, meshing and OpenMC/diffusion adapters |
+| [`diffusion_surrogate`](src/diffusion_surrogate/) | Diffusion solvers and cross-section calibration |
 | [`optimization`](src/optimization/) | Fitting, design updates, objectives and constraints |
 | [`depletion`](src/depletion/) | Isotope-depletion integrators, chains and CRAM kernels |
 | [`fuel_cycle`](src/fuel_cycle/) | Refuelling schedules and fuel-residence calculations |

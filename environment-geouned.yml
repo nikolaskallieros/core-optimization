@@ -1,0 +1,8 @@
+name: core-optimization-geouned
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.11
+  - freecad=1.0.0
+  - geouned=1.6.2

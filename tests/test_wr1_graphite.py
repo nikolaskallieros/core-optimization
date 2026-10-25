@@ -8,7 +8,8 @@ import unittest
 import torch
 
 from diffusion_surrogate.hexagonal import C6Grid, circle_triangle_area
-from examples.wr_1.model.geometry import fractions as wr1_fractions
+from geometry.diffusion import material_fractions
+from examples.wr_1.build_geometry import parameterized_geometry
 from examples.wr_1.model.case import study
 from examples.wr_1.model.graphite import add_graphite, graphite_mapping, initialize_graphite
 from optimization.objectives import joint_merit
@@ -130,7 +131,7 @@ class GraphiteGeometryTests(unittest.TestCase):
         self.append()
         grid = C6Grid(self.case["geometry"]["apothem_cm"], 8, [0., 99., 198., 297.])
         models = [SimpleNamespace(design=self.design, solver=SimpleNamespace(grid=grid), case=self.case, geometry_key="fixture",
-                  geometry=lambda: wr1_fractions(grid, self.design, self.case)) for _ in range(3)]
+                  geometry=lambda: material_fractions(parameterized_geometry(self.design, self.case), grid)) for _ in range(3)]
         points = {str(i): SimpleNamespace(model=model) for i, model in enumerate(models)}
         with shared_geometry(points):
             fractions = models[0]._live_fractions

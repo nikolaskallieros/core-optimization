@@ -7,6 +7,8 @@ import scipy.sparse as sp
 from scipy.sparse.linalg import splu
 import torch
 
+from geometry.intersections import circle_triangle_area
+
 from .solver import tensor
 from .solver3d import Diffusion3D
 
@@ -14,7 +16,7 @@ from .solver3d import Diffusion3D
 class C6Grid:
     """Equilateral triangles extruded axially, with conservative C6 connections."""
     def __init__(self, apothem_cm, subdivisions, z_edges_cm, *, symmetry_boundary="periodic",
-                 radial_boundary="vacuum", axial_boundaries=("vacuum", "vacuum")):
+                 radial_boundary="vacuum", axial_boundaries=("vacuum", "vacuum"), cad_domain=None):
         """Build a triangular-prism mesh for one hexagonal symmetry sector.
 
         Parameters
@@ -31,6 +33,9 @@ class C6Grid:
             Boundary treatment on the outer radial face.
         axial_boundaries : tuple of str, optional
             Bottom and top boundary types, each vacuum or reflective.
+        cad_domain : geometry.Shape or None, optional
+            Shared CAD sector. Gmsh meshes its actual lower face. None constructs
+            the same sector for standalone numerical tests.
 
         Raises
         ------
@@ -57,18 +62,15 @@ class C6Grid:
         self.z_edges = tensor(z_edges_cm)
         if self.z_edges.ndim != 1 or bool((self.z_edges.diff() <= 0).any()):
             raise ValueError("Axial edges must increase")
-        points, indices = [], {}
-        for i in range(n + 1):
-            for j in range(n + 1 - i):
-                indices[i, j] = len(points)
-                points.append([a * (i + j) / n, a * (j - i) / (math.sqrt(3) * n)])
-        triangles = []
-        for i in range(n):
-            for j in range(n - i):
-                triangles.append([indices[i, j], indices[i + 1, j], indices[i, j + 1]])
-                if i + j < n - 1:
-                    triangles.append([indices[i + 1, j], indices[i + 1, j + 1], indices[i, j + 1]])
-        points, triangles = np.asarray(points), np.asarray(triangles)
+        from geometry import prism
+        from geometry.meshing import bottom_face, triangular_face
+        if cad_domain is None:
+            cad_domain = prism([[0., 0.], [a, -a / math.sqrt(3)], [a, a / math.sqrt(3)]],
+                               [float(self.z_edges[0]), float(self.z_edges[-1])])
+        points, triangles = triangular_face(bottom_face(cad_domain), n)
+        lattice = np.rint(np.column_stack((points[:, 0] - math.sqrt(3) * points[:, 1],
+                                          points[:, 0] + math.sqrt(3) * points[:, 1])) * n / (2 * a)).astype(int)
+        indices = {tuple(position): i for i, position in enumerate(lattice)}
         self.vertices = tensor(points[triangles])
         self.triangle_ids = torch.tensor(triangles)
         self.points = tensor(points)
@@ -125,42 +127,6 @@ class C6Grid:
                       (ids[:, 0], torch.full((len(triangles),), area, dtype=torch.float64), dz[0].expand(len(triangles)) / 2),
                       (ids[:, -1], torch.full((len(triangles),), area, dtype=torch.float64), dz[-1].expand(len(triangles)) / 2)]
         self.boundaries = (radial_boundary, "reflective", "reflective", "reflective", *axial_boundaries)
-
-
-def circle_triangle_area(vertices, center, radius):
-    """Integrate exact circle-triangle intersections with live derivatives.
-
-    Parameters
-    ----------
-    vertices : torch.Tensor
-        Counterclockwise triangle vertices in cm, shaped (n_triangles, 3, 2).
-    center : torch.Tensor
-        Circle x/y center in cm.
-    radius : torch.Tensor
-        Scalar circle radius in cm.
-
-    Returns
-    -------
-    torch.Tensor
-        Intersection area in cm² for each triangle.
-    """
-    p = vertices - center
-    q = torch.roll(p, -1, dims=1)
-    delta = q - p
-    aa, bb = delta.square().sum(-1), 2 * (p * delta).sum(-1)
-    cc = p.square().sum(-1) - radius.square()
-    discriminant = bb.square() - 4 * aa * cc
-    root = torch.sqrt(torch.where(discriminant > 0, discriminant, torch.ones_like(discriminant)))
-    left = torch.where(discriminant > 0, (-bb - root) / (2 * aa), torch.zeros_like(aa)).clamp(0, 1)
-    right = torch.where(discriminant > 0, (-bb + root) / (2 * aa), torch.zeros_like(aa)).clamp(0, 1)
-    cuts = torch.stack((torch.zeros_like(aa), left, right, torch.ones_like(aa)), dim=-1)
-    u = p[..., None, :] + cuts[..., :-1, None] * delta[..., None, :]
-    v = p[..., None, :] + cuts[..., 1:, None] * delta[..., None, :]
-    cross, dot = u[..., 0] * v[..., 1] - u[..., 1] * v[..., 0], (u * v).sum(-1)
-    dot = torch.where((cross == 0) & (dot == 0), torch.ones_like(dot), dot)
-    inside = ((u + v) / 2).square().sum(-1) <= radius.square()
-    contribution = torch.where(inside, cross, radius.square() * torch.atan2(cross, dot)) / 2
-    return contribution.sum(dim=(1, 2))
 
 
 def _scipy(matrix):
@@ -248,6 +214,31 @@ class _FrozenSolve(torch.autograd.Function):
 
 class SparseDiffusion3D(Diffusion3D):
     """Finite-volume diffusion with sparse LU and implicit differentiation."""
+    def integration_weights(self):
+        """Return weights for initializing the eigenvector.
+
+        Returns
+        -------
+        torch.Tensor
+            Physical integration weights in degree-of-freedom order.
+        """
+        return self.grid.volumes
+
+    def cell_flux(self, flux):
+        """Map solver degrees of freedom to material-cell mean fluxes.
+
+        Parameters
+        ----------
+        flux : torch.Tensor
+            Source-normalized flux by degree of freedom and energy group.
+
+        Returns
+        -------
+        torch.Tensor
+            Cell-mean fluxes; finite-volume unknowns already have this meaning.
+        """
+        return flux
+
     def operators(self, fractions, macro, extrapolation=1.):
         """Assemble sparse multigroup loss and fission operators.
 
@@ -454,8 +445,9 @@ class SparseDiffusion3D(Diffusion3D):
         self._validate_fractions(fractions)
         a, b, escape = self.operators(fractions, macro, extrapolation)
         operators_done = time.perf_counter()
-        groups = a.shape[0] // self.grid.size
-        weight = self.grid.volumes.repeat(groups)
+        degrees = escape.shape[0]
+        groups = a.shape[0] // degrees
+        weight = self.integration_weights().detach().repeat(groups)
         sa, sb = _scipy(a), _scipy(b)
         phi0, lam0, iterations, error, normalization = self._eigenpair_sparse(sa, sb, weight.numpy())
         weight = tensor(normalization)
@@ -471,9 +463,9 @@ class SparseDiffusion3D(Diffusion3D):
         else:
             phi, lam = phi0, lam0
         derivative_done = time.perf_counter()
-        source_flux = (phi / _matvec(a, phi).sum()).reshape(groups, self.grid.size).T
+        source_flux = (phi / _matvec(a, phi).sum()).reshape(groups, degrees).T
         leakage = (escape * source_flux).sum(0)
-        fields = self._observables(fractions, macro, source_flux, leakage, power_W)
+        fields = self._observables(fractions, macro, self.cell_flux(source_flux), leakage, power_W)
         return {**fields, "keff": 1 / lam, "eigen_residual": error,
                 "iterations": iterations, "solve_wall_s": time.perf_counter() - started,
                 "operators_wall_s": operators_done - started, "eigen_wall_s": eigen_done - operators_done,

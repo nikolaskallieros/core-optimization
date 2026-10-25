@@ -9,7 +9,8 @@ shared packages so the example remains small.
 
 | Location | Responsibility |
 | --- | --- |
-| `src/diffusion_surrogate/` | Diffusion solvers, material calibration, reusable geometry mappings and response interfaces |
+| `src/geometry/` | Shared parametric build123d construction, material identities, meshing and geometry adapters |
+| `src/diffusion_surrogate/` | Diffusion solvers, material calibration and response interfaces |
 | `src/optimization/` | Optimizers, fitting, design loops, objectives and constraints |
 | `src/depletion/` | Dense and sparse depletion integration, chain assembly and CRAM kernels |
 | `src/fuel_cycle/` | Refuelling schedules, lifecycle integration and residence histories |
@@ -74,6 +75,27 @@ category before introducing another package or a catch-all utilities folder.
 - Read scenario values through the resolved example configuration. Keep one
   executable source for each setting; do not duplicate defaults in scripts or
   library code. Generated inputs are records of a run, not editable source inputs.
+- Geometry follows TOML → build123d solids → shared numerical adapters.
+  Keep the small geometry builder with the example. Use `CadGeometry.from_solids`
+  to bind physical regions, materials and boundary faces. Extend `src/geometry/`
+  for reusable operations; do not add an independent OpenMC layout, a duplicate
+  FreeCAD model or a hand-written example fraction map.
+- Export one `geometry.step` per prepared case and replace it when regenerating
+  that case. It contains build123d solids, material identities and boundary faces.
+  A saved STEP is fixed geometry. Preserve the live parametric object for shape
+  derivatives; never imply that reading a STEP retains the PyTorch graph.
+- Use GEOUNED in its isolated FreeCAD environment for analytic OpenMC conversion,
+  and Gmsh for conformal tetrahedral meshes or the analytical sector adapter.
+  Unsupported surfaces or uncertain conversion must fail without simplification
+  or an automatic change of geometry backend. Verify material identities,
+  boundaries, native ownership and mesh-volume convergence when changing adapters.
+- For curved tetrahedral meshes, declare `volume_rtol` with the mesh inputs and
+  justify it by refinement. Preparation compares mesh and physical CAD volumes;
+  do not rescale physical volumes or densities to hide discretization error.
+- General CAD construction and remeshing are not autograd operations. Supply an
+  explicit Torch coordinate map for tetrahedral shape derivatives, or retain a
+  supported exact cut-cell parameterization such as WR-1's. Keep the numerical
+  geometry consistent with the CAD, and remesh when connectivity must change.
 - Native and surrogate models share the physical geometry by default. A simplified
   layout requires an explicit `surrogate_mesh`, consistent material identities,
   ordering and represented volumes, and a new fit. Calibration must not silently
@@ -124,6 +146,7 @@ category before introducing another package or a catch-all utilities folder.
 | Python test suite | `.venv/bin/python -m pytest -q tests` |
 | Complete bounded installation checks, including the test suite and native OpenMC | `.venv/bin/python tests/check_installation.py` |
 | Minimal geometry-optimization tutorial | `.venv/bin/python -m examples.slab.run` |
+| CAD, native cells and diffusion volumes for all WR-1 scenarios | `.venv/bin/python tests/check_cad_geometry.py` |
 
 The bounded checks use small fixtures and do not require a full continuous-energy
 data download. Three historical-result regressions require local WR-1 records and

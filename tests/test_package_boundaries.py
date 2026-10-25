@@ -20,7 +20,7 @@ from pathlib import Path
 import pkgutil
 import sys
 for name in ('coupling', 'depletion', 'diffusion_surrogate', 'fuel_cycle',
-             'get_nuclear_data', 'materials', 'optimization', 'plotting', 'runtime'):
+             'geometry', 'get_nuclear_data', 'materials', 'optimization', 'plotting', 'runtime'):
     package = importlib.import_module(name)
     for module in pkgutil.walk_packages(package.__path__, prefix=name + '.'):
         importlib.import_module(module.name)

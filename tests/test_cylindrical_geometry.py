@@ -6,11 +6,12 @@ import numpy as np
 import pytest
 import torch
 
-from diffusion_surrogate.cylinders import (
-    Cylinder, HexagonalDomain, channel_regions, cylinder_fractions, insert_regions,
+from geometry.channels import (
+    Cylinder, HexagonalDomain, channel_regions, channel_geometry, hexagonal_domain, insert_regions,
 )
+from geometry.diffusion import material_fractions
 from diffusion_surrogate.hexagonal import C6Grid
-from diffusion_surrogate.openmc_cylinders import build
+from coupling.openmc import build
 
 
 def annular_case(*, full=False):
@@ -60,6 +61,10 @@ def annular_case(*, full=False):
                   "atom_density": {"Na23": .03}, "temperature_K": 500.}
     native = channel_regions(domain, sites, xy, interfaces, z, [(0,), tuple(range(1, 7))],
                              material, background)
+    solid, boundaries = hexagonal_domain(native["geometry"])
+    channels = {site: Cylinder(torch.as_tensor(xy[i]), torch.as_tensor(interfaces[i], dtype=torch.float64))
+                for i, site in enumerate(sites)}
+    native["cad_geometry"] = channel_geometry(solid, native["regions"], channels, boundaries).record()
     return native, sites, xy, interfaces
 
 
@@ -71,7 +76,9 @@ def test_annular_fuel_volumes_and_live_gradients_with_four_axial_levels():
                                (radii.new_tensor(interfaces[i][0]), radii[int(i > 0)]))
                  for i, site in enumerate(sites)}
     grid = C6Grid(4., 8, [0., .5, 1., 2., 3., 4.5, 6., 8., 10.])
-    volumes = grid.volumes @ cylinder_fractions(grid, native["regions"], cylinders)
+    solid, boundaries = hexagonal_domain(native["geometry"])
+    cad = channel_geometry(solid, native["regions"], cylinders, boundaries)
+    volumes = grid.volumes @ material_fractions(cad, grid)
     np.testing.assert_allclose(volumes.detach(), [r["volume_cm3"] for r in native["regions"]],
                                rtol=2e-10, atol=1e-12)
     assert len(native["physical_assembly_to_region"]) == 28
@@ -141,7 +148,9 @@ def test_native_geometry_uses_declared_radial_and_axial_boundaries(tmp_path, ful
         Use the full hexagon or its rotational symmetry sector.
     """
     native, _, _, _ = annular_case(full=full)
-    native["geometry"]["boundaries"] = ["reflective"] * 5 + ["vacuum"]
+    for condition in native["cad_geometry"]["boundaries"].values():
+        if "slot" in condition:
+            condition["type"] = "vacuum" if condition["slot"] == 5 else "reflective"
     native.update(sampling={"particles": 100, "batches": 10, "inactive": 2, "seed": 9},
                   cross_sections=str(tmp_path / "cross_sections.xml"),
                   temperature_label_tolerance_K=1., group_edges_eV=[0., 2e7],
@@ -155,13 +164,16 @@ def test_native_geometry_uses_declared_radial_and_axial_boundaries(tmp_path, ful
 def test_wr1_diffusion_mesh_inherits_native_physical_boundaries():
     """Keep native and surrogate boundaries aligned after a declared input change."""
     from examples.wr_1.model.case import study
-    from examples.wr_1.model.geometry import make_case, mesh
+    from examples.wr_1.model.case import make_case
+    from geometry.diffusion import discretize
+    from examples.wr_1.build_geometry import parameterized_geometry
 
     case = study(1)
     settings = case.settings()
     settings.update(outer_radial_boundary="reflective", axial_boundaries=["reflective", "vacuum"])
     native = make_case(case.configuration.data("model"), settings)
-    geometry = mesh(case.design(), native, subdivisions=2, axial_subdivisions=1)
+    design = case.design()
+    geometry = discretize(lambda: parameterized_geometry(design, native), subdivisions=2, axial_subdivisions=1)
     assert geometry.grid.boundaries == tuple(native["geometry"]["boundaries"])
     assert geometry.grid.boundaries[0] == geometry.grid.boundaries[4] == "reflective"
     assert geometry.grid.boundaries[5] == "vacuum"

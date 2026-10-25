@@ -5,7 +5,7 @@ import numpy as np
 import torch
 
 from diffusion_surrogate.symmetry import audit_c6_orbits
-from diffusion_surrogate.cylinders import HexagonalDomain, cylinder_clearances, orbit_annulus, insert_regions
+from geometry.channels import HexagonalDomain, cylinder_clearances, orbit_annulus, insert_regions
 from materials.composition import number_density
 
 
@@ -31,7 +31,7 @@ def initialize_sleeves(design, specification):
     positions = tuple(specification["positions"])
     if len(positions) != 7 or len(set(positions)) != 7 or design.graphite_thickness_mm.shape != (21,):
         raise ValueError("Sleeves require seven independent positions times three thicknesses")
-    from .geometry import ChannelDesign
+    from geometry.channels import ChannelDesign
     mapped = ChannelDesign.forward(design)
     centres = mapped["channel_xy_mm"].detach().numpy()/10
     labels = [(bool(f), int(r)) for f, r in zip(design.fuelled, design.ring)]

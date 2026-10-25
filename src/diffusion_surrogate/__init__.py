@@ -12,8 +12,8 @@ _EXPORTS = {name: module for module, names in {
     'solver3d': ('Grid3D', 'Diffusion3D', 'cylinder_regions'),
     'regional': ('RegionalSurrogate',),
     'geometry': ('DiffusionGeometry',),
+    'finite_element': ('FiniteElementDiffusion', 'TetrahedralGrid'),
     'equivalence': ('equivalence_bases', 'shared_bases'),
-    'cylinders': ('Cylinder', 'HexagonalDomain', 'channel_regions', 'cylinder_fractions'),
 }.items() for name in names}
 __all__ = list(_EXPORTS)
 

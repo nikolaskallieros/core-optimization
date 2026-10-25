@@ -1,23 +1,24 @@
-"""OpenMC transport and observations for cylindrical regions in hexagonal domains."""
-from functools import reduce
-import math
-import operator
+"""OpenMC transport and observations from the shared material-volume CAD model."""
 from pathlib import Path
 import time
 from types import SimpleNamespace
 
 import numpy as np
 
-def build(case, directory):
-    """Export a cylindrical OpenMC model with the shared tally conventions.
+def build(case, directory, *, geometry=None):
+    """Export the shared CAD model, native cells and observation tallies.
 
     Parameters
     ----------
     case : dict
-        Native cylindrical case with material regions, hexagonal domain, sampling and
+        Native case with cad_geometry, ordered material regions, sampling and
         required response/depletion tallies.
     directory : str or pathlib.Path
         Calculation directory containing the OpenMC XML and native output files.
+    geometry : geometry.CadGeometry or None, optional
+        Actual CAD from the example's builder. Otherwise load case["cad_geometry"]
+        as a STEP path or the analytical parameter record. GEOUNED converts the
+        resulting build123d solids into analytic OpenMC surfaces and cells.
 
     Returns
     -------
@@ -35,89 +36,36 @@ def build(case, directory):
     openmc.reset_auto_ids()
     directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=True)
-    spec, sampling = case["geometry"], case["sampling"]
+    sampling = case["sampling"]
     materials = material_list(case)
     for i in case.get("boron_response", {}).get("region_indices", []):
         for name in case["boron_response"]["nuclides"]:
             if name not in materials[i].get_nuclides():
                 materials[i].add_nuclide(name, 0.)
-    boundaries = spec.get("boundaries", ["vacuum"] * 6)
-    bottom = openmc.Plane(a=0., b=0., c=-1., d=-spec["lower_cm"][2], boundary_type=boundaries[4])
-    top = openmc.ZPlane(z0=spec["upper_cm"][2], boundary_type=boundaries[5])
-    if spec["symmetry"] == "c6":
-        a = spec["apothem_cm"]
-        symmetry_boundary = spec.get("symmetry_boundary_type", "periodic")
-        if symmetry_boundary not in ("reflective", "periodic"):
-            raise ValueError("Sector faces must use a symmetry boundary")
-        lower = openmc.Plane(a=.5, b=math.sqrt(3) / 2, boundary_type=symmetry_boundary)
-        upper = openmc.Plane(a=.5, b=-math.sqrt(3) / 2, boundary_type=symmetry_boundary)
-        if symmetry_boundary == "periodic":
-            lower.periodic_surface = upper
-        radial = [openmc.XPlane(x0=a, boundary_type=boundaries[0])]
-        domain = +lower & +upper & -radial[0] & -bottom & -top
-        periodic = [lower, upper] if symmetry_boundary == "periodic" else []
-    else:
-        a = spec["apothem_cm"]
-        radial = [openmc.Plane(a=math.cos(i * math.pi / 3), b=math.sin(i * math.pi / 3),
-                              d=a, boundary_type=boundaries[0]) for i in range(6)]
-        domain = reduce(operator.and_, [-p for p in radial]) & -bottom & -top
-        periodic = []
-    cylinders = {}
+    from geometry import CadGeometry
+    from geometry.openmc import from_cad
 
-    def cylinder(piece, name):
-        """Reuse a cylindrical surface for a given center and interface radius.
-
-        Parameters
-        ----------
-        piece : dict
-            Cylinder-piece record with xy_cm and named interface radii in cm.
-        name : str
-            Radius-field key, such as inner_radius_cm or outer_radius_cm.
-
-        Returns
-        -------
-        openmc.ZCylinder
-            Cached axial cylinder surface.
-        """
-        radius = piece[name]
-        key = (*piece["xy_cm"], radius)
-        if key not in cylinders:
-            cylinders[key] = openmc.ZCylinder(x0=key[0], y0=key[1], r=radius)
-        return cylinders[key]
-
-    z_planes = {z: openmc.ZPlane(z0=z) for entry in case["regions"] for z in entry["z_bounds_cm"]}
-    z_planes[spec["lower_cm"][2]] = bottom
-    z_planes[spec["upper_cm"][2]] = top
-    cells, sources = [], []
-    for i, entry in enumerate(case["regions"]):
-        low, high = (z_planes[z] for z in entry["z_bounds_cm"])
-        region = domain & (-low if low is bottom else +low) & -high
-        if "pieces" in entry:
-            pieces = []
-            for piece in entry["pieces"]:
-                part = -cylinder(piece, "outer_radius_cm")
-                if piece["inner_radius_cm"]:
-                    part &= +cylinder(piece, "inner_radius_cm")
-                pieces.append(part)
-            region &= reduce(operator.or_, pieces)
-        else:
-            for shape in spec["channel_shapes"]:
-                # Sleeve thickness is local to an axial position, not full height.
-                if "z_bounds_cm" not in shape or shape["z_bounds_cm"] == entry["z_bounds_cm"]:
-                    region &= +cylinder(shape, "outer_radius_cm")
-        cell = openmc.Cell(i + 1, name=entry["label"], region=region,
-                           fill=None if entry["void"] else materials[i])
-        cells.append(cell)
+    source = case["cad_geometry"] if geometry is None else geometry
+    cad = (source if isinstance(source, CadGeometry) else
+           CadGeometry.from_record(source) if isinstance(source, dict) else CadGeometry.read_step(source))
+    cad = cad.as_solids()
+    if tuple(volume.label for volume in cad.volumes) != tuple(region["label"] for region in case["regions"]):
+        raise ValueError("CAD volume order must match native material and tally order")
+    step = cad.write_step(directory / "geometry.step")
+    bindings = {region["label"]: None if region["void"] else material
+                for region, material in zip(case["regions"], materials)}
+    adapted = from_cad(step, bindings)
+    cells, sources = adapted.cells, []
+    physical = [surface for surface in adapted.boundaries.values() if surface.boundary_type != "periodic"]
+    periodic = [surface for surface in adapted.boundaries.values() if surface.boundary_type == "periodic"]
+    for cell, entry, boxes in zip(cells, case["regions"], adapted.source_bounds_cm):
         if entry["depletable"]:
-            for piece in entry["pieces"]:
-                source = openmc.IndependentSource(space=openmc.stats.CylindricalIndependent(
-                    r=openmc.stats.PowerLaw(0., piece["outer_radius_cm"], 1),
-                    phi=openmc.stats.Uniform(0., 2 * math.pi),
-                    z=openmc.stats.Uniform(*entry["z_bounds_cm"]), origin=(*piece["xy_cm"], 0.)),
-                    constraints={"domains": [cell]}, strength=entry["volume_cm3"] / len(entry["pieces"]))
+            for lower, upper in boxes:
+                source = openmc.IndependentSource(space=openmc.stats.Box(lower, upper),
+                    constraints={"domains": [cell]}, strength=entry["volume_cm3"] / len(boxes))
                 source.energy = openmc.stats.Discrete([2e6], [1.])
                 sources.append(source)
-    model = openmc.Model(geometry=openmc.Geometry(cells),
+    model = openmc.Model(geometry=adapted.geometry,
                          materials=openmc.Materials([m for m, r in zip(materials, case["regions"]) if not r["void"]]))
     model.materials.cross_sections = case["cross_sections"]
     settings = model.settings
@@ -138,7 +86,8 @@ def build(case, directory):
     settings.output = {"path": ".", "summary": True, "tallies": False}
     settings.statepoint, settings.sourcepoint = {"batches": [sampling["batches"]]}, {"write": False}
     settings.entropy_mesh = openmc.RegularMesh()
-    settings.entropy_mesh.lower_left, settings.entropy_mesh.upper_right = spec["lower_cm"], spec["upper_cm"]
+    settings.entropy_mesh.lower_left, settings.entropy_mesh.upper_right = (
+        value.detach().numpy() for value in cad.bounds_cm())
     settings.entropy_mesh.dimension = [5, 5, 5]
     comparison = openmc.RectilinearMesh()
     comparison.x_grid, comparison.y_grid, comparison.z_grid = case["comparison_edges_cm"]
@@ -192,7 +141,7 @@ def build(case, directory):
               names=response["nuclides"], microscopic=True)
         tally(17, [selected, energy, outgoing], ["scatter", "nu-scatter"], "analog", names=response["nuclides"])
         tally(18, [selected, energy, legendre], ["scatter"], "analog", names=response["nuclides"])
-    tally(19, [openmc.SurfaceFilter(radial + [bottom, top]), energy], ["current"], "analog")
+    tally(19, [openmc.SurfaceFilter(physical), energy], ["current"], "analog")
     if periodic:
         tally(20, [openmc.SurfaceFilter(periodic), energy], ["current"], "analog")
     tally(21, [domain_filter], ["kappa-fission", "nu-fission"])
@@ -228,7 +177,7 @@ def run(case, directory):
     Parameters
     ----------
     case : dict
-        Native cylindrical case with material regions, hexagonal domain, sampling and
+        Native case with cad_geometry, ordered material regions, sampling and
         required response/depletion tallies.
     directory : str or pathlib.Path
         Calculation directory containing the OpenMC XML and native output files.
@@ -266,12 +215,12 @@ def run(case, directory):
 
 
 def extract_completed(case, directory, *, batches=None, materials=None, started=None, collapsed=None):
-    """Recover completed cylindrical transport and composition responses.
+    """Recover completed CAD-derived transport and composition responses.
 
     Parameters
     ----------
     case : dict
-        Native cylindrical case with material regions, hexagonal domain, sampling and
+        Native case with cad_geometry, ordered material regions, sampling and
         required response/depletion tallies.
     directory : str or pathlib.Path
         Calculation directory containing the OpenMC XML and native output files.
@@ -398,11 +347,11 @@ def extract_completed(case, directory, *, batches=None, materials=None, started=
             response = tally_cross_sections(state, (22, 23, 24), bflux, bflux, len(nuclides), atom_density=density)
             record["boron_response"] = {"region_indices": selected, "nuclides": nuclides,
                                         "atom_density": density, "microscopic": response, "analog_sampled": density > 0}
-        if (case["geometry"]["symmetry"] == "c6"
-                and case["geometry"].get("symmetry_boundary_type", "periodic") == "periodic"):
+        if 20 in state.tallies:
             periodic = state.get_tally(id=20)
-            record["periodic_current_per_source"] = periodic.mean.reshape(2, -1)
-            record["periodic_current_scale"] = periodic.std_dev.reshape(2, -1)
+            periodic_count = periodic.find_filter(openmc.SurfaceFilter).num_bins
+            record["periodic_current_per_source"] = periodic.mean.reshape(periodic_count, -1)
+            record["periodic_current_scale"] = periodic.std_dev.reshape(periodic_count, -1)
     record.update({key: case[key] for key in ("geometry", "design", "geometry_checks", "physical_assembly_to_region",
                                              "effective_approximations") if key in case},
                   boron_mg_B10_per_kg=case.get("boron_mg_B10_per_kg", 0.),

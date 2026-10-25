@@ -289,6 +289,36 @@ def slab_case(tmp_path):
                      results=tmp_path / "results", archive_root=tmp_path)
 
 
+def test_curved_mesh_preparation_requires_declared_volume_accuracy(tmp_path):
+    """Accept declared mesh error while retaining the physical CAD volume.
+
+    Parameters
+    ----------
+    tmp_path : pathlib.Path
+        Isolated fixture inputs and preparation output.
+    """
+    import build123d as bd
+    from geometry import CadGeometry
+    from geometry.diffusion import discretize
+
+    case = slab_case(tmp_path)
+    sphere = bd.Solid.make_sphere(20)
+    cad = CadGeometry.from_solids({"fuel": sphere})
+    mapped = discretize(cad, max_size_cm=.6, curvature_segments=32)
+    physical_volume = sphere.volume / 1000
+    relative_error = abs(float(mapped.grid.volumes.sum()) / physical_volume - 1)
+    assert 1e-4 < relative_error < .02
+    native = case.make_case()
+    native["regions"] = [{"label": "fuel", "volume_cm3": physical_volume}]
+    case = replace(case, model=replace(case.model, transport=lambda **values: native,
+                                       mesh=lambda design, definition: mapped))
+    with pytest.raises(ArithmeticError, match="volume_rtol"):
+        prepare_case(case)
+    mapped = replace(mapped, volume_rtol=.02)
+    directory = prepare_case(case)
+    assert json.loads((directory / "case.json").read_text())["regions"][0]["volume_cm3"] == physical_volume
+
+
 def test_preparation_and_projection_use_the_callers_parameters(tmp_path):
     """Verify preparation and projection use the callers parameters.
 
@@ -504,7 +534,7 @@ def test_native_export_does_not_require_boron(tmp_path):
     tmp_path : pathlib.Path
         Isolated temporary directory supplied by pytest.
     """
-    from diffusion_surrogate.openmc_cylinders import build
+    from coupling.openmc import build
 
     shape = {"xy_cm": [0., 0.], "inner_radius_cm": 0., "outer_radius_cm": .5}
     native = {
@@ -518,6 +548,13 @@ def test_native_export_does_not_require_boron(tmp_path):
              "atom_density": {"Na23": .02}, "temperature_K": 600., "volume_cm3": 8 * np.sqrt(3) - np.pi / 4}],
         "cross_sections": str(tmp_path / "cross_sections.xml"), "temperature_label_tolerance_K": 1.,
         "comparison_edges_cm": [[-3., 3.], [-3., 3.], [0., 1.]], "group_edges_eV": [0., 2e7]}
+    from geometry import CadGeometry, MaterialVolume, cylinder
+    from geometry.channels import hexagonal_domain
+    domain, boundaries = hexagonal_domain(native["geometry"])
+    fuel = cylinder([0., 0.], .5, [0., 1.])
+    native["cad_geometry"] = CadGeometry(domain,
+        (MaterialVolume("fuel", "fuel", fuel), MaterialVolume("coolant", "coolant", domain - fuel)),
+        boundaries).record()
     model, materials = build(native, tmp_path)
     assert {tally.id for tally in model.tallies}.isdisjoint({22, 23, 24})
     assert [material.temperature for material in materials] == [900., 600.]

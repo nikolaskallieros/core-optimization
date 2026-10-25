@@ -20,21 +20,24 @@ Initial dkeff/dwidth: 0.024150 /cm
 
 The script also prints the measured optimization time. The model uses
 manufactured one-group cross sections; it needs no OpenMC run or nuclear-data
-download and is not a calibrated reactor model. It writes no result files.
+download and is not a calibrated reactor model. It writes the final build123d CAD
+to `runs/slab/geometry.step`, replacing that file on the next run.
 
 ## Follow the information
 
 ```text
-model.toml → run() → Slab.forward() → Diffusion3D.solve()
-                           ↑                 ↓
-                    updated width ← minimize(objective)
+model.toml → Slab.geometry() → shared CAD → diffusion → objective
+                                  ↓                       ↓
+                             geometry.step       gradients and updated width
 ```
 
 | File or interface | What you supply or receive |
 | --- | --- |
 | [model.toml](model.toml) | Cell count, initial width, bounds, material data and target k-effective |
 | [Slab](run.py) | One trainable coordinate, fixed material data and a geometry builder |
-| `Grid3D` | Mesh edges in cm and boundary conditions on the six faces |
+| `CadGeometry` | One build123d construction, named material volumes and face boundary conditions |
+| `geometry.diffusion.discretize` | Mesh and exact material fractions derived from that CAD construction |
+| `geometry.openmc.from_cad` | OpenMC geometry derived from the same construction or its saved STEP |
 | `Diffusion3D.solve` | Cell-by-region fractions and macroscopic data in; k-effective, flux and power out |
 | `torch.autograd.grad` | The initial sensitivity of k-effective to width |
 | `minimize` | A scalar objective and a PyTorch optimizer; updated parameters and a convergence record |
@@ -44,9 +47,10 @@ One cell in each transverse direction makes this a one-dimensional problem on
 the three-dimensional solver interface. Each cell contains the same material,
 so its single material fraction is one.
 
-`Slab.forward()` constructs the mesh edges from the **live width tensor** on
-every evaluation. Converting that width to a Python float or detaching it while
-building the mesh would sever the geometry derivative. A sigmoid maps the
+`Slab.forward()` constructs the CAD model from the **live width tensor** on
+every evaluation. The shared adapter derives the mesh edges and material fractions.
+Converting that width to a Python float or detaching it along the differentiated
+path would sever the geometry derivative. A sigmoid maps the
 optimizer's unconstrained coordinate into the physical width bounds, keeping
 line-search trials valid. The physical sensitivity printed by the script is
 `dkeff/dwidth`, not the derivative with respect to that internal coordinate.
@@ -66,11 +70,39 @@ analytical solution as well as the optimized target and sensitivity sign.
 Copy this directory to `examples/my_case`, then edit `model.toml` and the geometry
 in `run.py`. Run it with `.venv/bin/python -m examples.my_case.run`.
 
-For a new material layout, build a fraction array with one row per mesh cell and
-one column per material region. Each row must sum to one. Supply macroscopic
-cross sections for the same region order; scattering arrays use incoming then
-outgoing energy-group axes. A different objective only needs to return a scalar
-Torch tensor from the solver responses.
+For a new 3D layout, build the actual solids with build123d and bind their material
+keys with `CadGeometry.from_solids`. The adapters derive analytic OpenMC cells
+through GEOUNED and a conformal tetrahedral diffusion mesh through Gmsh.
+The slab's analytical `box` construction retains its exact width derivative;
+that optional parameterization is useful for simple moving dimensions.
+Supply cross sections in the same material-volume order; scattering arrays use
+incoming then outgoing energy-group axes. A different objective only needs to
+return a scalar Torch tensor from the solver responses.
+
+For example, the existing slab geometry can also produce OpenMC cells:
+
+```python
+from geometry.openmc import from_cad
+
+cad = model.geometry()
+cad.write_step("runs/slab/geometry.step")
+native = from_cad(cad, {"fuel": openmc_material})
+```
+
+`openmc_material` is the caller's OpenMC material for the TOML material key.
+This constructs geometry without running transport. Passing the STEP path to
+either adapter restores a fixed model, including material identities. Keep the
+live parameterization for differentiation: STEP stores fixed solids, not
+PyTorch's computation graph. Analytical helper lengths are in cm; direct
+build123d and STEP lengths are in mm.
+
+The box mesh is Cartesian. The WR-1 example uses Gmsh to mesh the CAD sector face
+and exact cylinder intersections to retain moving-interface derivatives.
+General solids use `discretize(cad, max_size_cm=...)` and
+`FiniteElementDiffusion(mesh.grid)`. Material derivatives work directly; shape
+derivatives require an explicit Torch mesh-coordinate map consistent with the CAD.
+The tetrahedral mesh is fixed between remeshing steps. Current exact analytical
+cylinder intersections support disjoint or nested cylinders, including annuli.
 
 For an OpenMC-calibrated depletion study, use the
 [WR-1 case adapter](../wr_1/model/case.py) as the next example. It binds geometry,

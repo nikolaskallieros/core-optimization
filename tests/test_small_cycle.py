@@ -37,11 +37,12 @@ def test_sector_volumes_and_physical_multiplicity():
     """Verify sector volumes and physical multiplicity."""
     from fixtures.small_case import SmallDesign, make_case
     from diffusion_surrogate.hexagonal import C6Grid
-    from examples.wr_1.model.geometry import fractions as wr1_fractions
+    from geometry.diffusion import material_fractions
+    from examples.wr_1.build_geometry import parameterized_geometry
     design, case = SmallDesign(ROOT), make_case(ROOT)
     grid = C6Grid(case["geometry"]["apothem_cm"], 8, design.z_edges_mm.numpy() / 10,
                   symmetry_boundary="reflective")
-    actual = (wr1_fractions(grid, design, case).T @ grid.volumes).detach().numpy()
+    actual = (material_fractions(parameterized_geometry(design, case), grid).T @ grid.volumes).detach().numpy()
     np.testing.assert_allclose(actual, [r["volume_cm3"] for r in case["regions"]], rtol=1e-11)
     fuel = [r for r in case["regions"] if r["depletable"]]
     assert len(fuel) == 9 and sum(r["physical_multiplicity"] for r in fuel) == 21
@@ -238,7 +239,8 @@ def test_basis_transfer_preserves_diffusion_solution_and_rejects_incompatible_fi
     from fixtures.small_case import SmallDesign, definition
     from coupling.calibration import transfer_coefficients
     from examples.wr_1.model.calibration import make_surrogate as WR1Surrogate, equivalence_bases
-    from examples.wr_1.model.geometry import mesh
+    from geometry.diffusion import discretize
+    from examples.wr_1.build_geometry import parameterized_geometry
     from runtime.io import load_state
     state = load_state(FIXTURES / "small_cycle_states/fresh.json")
     case = state["case"]
@@ -260,7 +262,7 @@ def test_basis_transfer_preserves_diffusion_solution_and_rejects_incompatible_fi
             Diffusion outputs evaluated without retaining a gradient graph.
         """
         design = SmallDesign(ROOT)
-        model = WR1Surrogate(definition(ROOT), design, case, state["result"], mesh=mesh(design, case, subdivisions=8),
+        model = WR1Surrogate(definition(ROOT), design, case, state["result"], mesh=discretize(lambda: parameterized_geometry(design, case), subdivisions=8),
                              equivalence_layout=layout, equivalence_void_flux=False)
         with torch.no_grad():
             model.log_factors.copy_(factors)

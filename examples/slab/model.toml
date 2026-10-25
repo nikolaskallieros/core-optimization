@@ -3,6 +3,9 @@
 cells = 24
 initial_width_cm = 20.0
 width_bounds_cm = [5.0, 50.0]
+transverse_size_cm = [1.0, 1.0]
+material = "fuel"
+boundaries = ["vacuum", "vacuum", "reflective", "reflective", "reflective", "reflective"]
 
 # Homogeneous material with isotropic, nonmultiplying scattering.
 [material]

@@ -5,7 +5,7 @@ import numpy as np
 import torch
 
 from diffusion_surrogate.symmetry import audit_c6_orbits
-from diffusion_surrogate.cylinders import HexagonalDomain, cylinder_clearances, orbit_annulus, insert_regions
+from geometry.channels import HexagonalDomain, cylinder_clearances, orbit_annulus, insert_regions
 from materials.composition import number_density
 
 

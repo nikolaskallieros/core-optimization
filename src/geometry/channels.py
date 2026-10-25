@@ -1,14 +1,14 @@
-"""Cylindrical material regions and live fractions in hexagonal domains."""
+"""Material-region catalogues and shared CAD constructions for axial channels."""
 from dataclasses import dataclass
 import math
 from collections.abc import Mapping, Sequence
 
 import numpy as np
 import torch
+from torch import nn
 
-from diffusion_surrogate.geometry import circle_polygon_area
-from diffusion_surrogate.hexagonal import circle_triangle_area
-from diffusion_surrogate.solver import tensor
+from .intersections import circle_triangle_area
+from .model import CadGeometry, MaterialVolume, cylinder, prism, union
 
 
 @dataclass(frozen=True)
@@ -67,7 +67,9 @@ class HexagonalDomain:
             Disk-sector intersection area in cm²; full-domain mode assumes the disk is inside
             the enclosing hexagon.
         """
-        return math.pi * radius * radius if self.full else circle_polygon_area(xy, radius, self.polygon)
+        return math.pi * radius * radius if self.full else float(circle_triangle_area(torch.as_tensor(self.polygon, dtype=torch.float64)[None],
+                                         torch.as_tensor(xy, dtype=torch.float64),
+                                         torch.as_tensor(radius, dtype=torch.float64))[0])
 
     def bounds(self, z_edges_cm):
         """Return the Cartesian bounding box for the extruded domain.
@@ -343,73 +345,217 @@ class Cylinder:
     interfaces_cm: torch.Tensor | Sequence[torch.Tensor | Mapping[tuple[float, float], torch.Tensor]]
 
 
-def cylinder_fractions(grid, regions, cylinders):
-    """Compute live annular-cylinder fractions on a triangular-prism mesh.
+def hexagonal_domain(specification):
+    """Construct a CAD hexagon or rotational sector with named boundaries.
 
     Parameters
     ----------
-    grid : C6Grid
-        Fixed triangular-prism mesh with vertices and axial edges in cm.
-    regions : sequence of dict
-        Native region descriptions in the requested material-column order.
-    cylinders : mapping of str to Cylinder
-        Live cylinder interfaces keyed by stable physical site identity.
+    specification : dict
+        Apothem, lower/upper coordinates in cm, symmetry, six diffusion boundary
+        types and optional symmetry_boundary_type.
 
     Returns
     -------
-    torch.Tensor
-        Cell-by-region volume fractions retaining geometry derivatives.
-
-    Raises
-    ------
-    ArithmeticError
-        Fractions are negative or fail to partition the represented domain.
+    tuple
+        Shared CAD prism and its domain-face boundary specifications.
     """
-    areas = {}
+    a = specification["apothem_cm"]
+    h = a / math.sqrt(3)
+    full = specification["symmetry"] == "full"
+    vertices = ([[a, -h], [a, h], [0., 2*h], [-a, h], [-a, -h], [0., -2*h]] if full else
+                [[0., 0.], [a, -h], [a, h]])
+    domain = prism(vertices, [specification["lower_cm"][2], specification["upper_cm"][2]])
+    physical = specification.get("boundaries", ["vacuum"] * 6)
+    boundaries = {f"side/{i}": {"type": physical[0], "slot": 0} for i in range(len(vertices))}
+    if not full:
+        symmetry = specification.get("symmetry_boundary_type", "periodic")
+        for i, other in ((0, 2), (2, 0)):
+            boundaries[f"side/{i}"] = {"type": symmetry, "pair": f"side/{other}"}
+    boundaries.update(bottom={"type": physical[4], "slot": 4}, top={"type": physical[5], "slot": 5})
+    return domain, boundaries
+
+
+def channel_geometry(domain, regions, cylinders, boundaries, *, name="channels"):
+    """Build one parametric CAD assembly for annular channels and their background.
+
+    Parameters
+    ----------
+    domain : Shape
+        Convex polygonal CAD prism enclosing the material volumes.
+    regions : sequence of dict
+        Ordered material identities and axial intervals. Channel regions provide
+        orbit_site_ids and interface_index; other regions fill the background.
+        Numerical coordinates in generated region records are not read here.
+    cylinders : mapping of str to Cylinder
+        Live channel centers and radial interfaces, keyed by physical site.
+        An interface may map axial bounds to a local radius, for example a sleeve.
+    boundaries : dict
+        Domain-face boundary conditions shared by both numerical adapters.
+    name : str, optional
+        CAD assembly name.
+
+    Returns
+    -------
+    CadGeometry
+        Build123d construction with one material volume per region. Native cells
+        and diffusion fractions both derive from this object.
+    """
+    disks, visible = {}, {}
+    z = domain.parameters["z"]
 
     def disk(site, interface, bounds):
-        """Cache a live circle-triangle intersection for one site interface.
+        """Reuse a live full-height radial interface across axial regions.
 
         Parameters
         ----------
         site : str
-            Physical cylinder identity.
+            Physical channel identity.
         interface : int
-            Radial interface index, allowing negative indexing.
+            Radial interface index, including negative indexing.
         bounds : tuple of float
-            Axial interval in cm selecting a height-dependent radius when applicable.
+            Axial interval selecting a height-dependent interface.
+
+        Returns
+        -------
+        Shape
+            Shared cylinder construction.
+        """
+        channel = cylinders[site]
+        interface %= len(channel.interfaces_cm)
+        radius = channel.interfaces_cm[interface]
+        axial = isinstance(radius, Mapping)
+        key = (site, interface, bounds if axial else None)
+        if key not in disks:
+            disks[key] = cylinder(channel.xy_cm, radius[bounds] if axial else radius, z)
+        return disks[key]
+
+    def represented(site, bounds):
+        """Select physical cylinders intersecting the current symmetry domain.
+
+        Parameters
+        ----------
+        site : str
+            Physical channel identity.
+        bounds : tuple of float
+            Axial interval for the outer interface.
+
+        Returns
+        -------
+        bool
+            Whether the represented outer cylinder has nonzero transverse area.
+        """
+        outer = disk(site, -1, bounds)
+        if outer not in visible:
+            p = outer.parameters
+            area = circle_triangle_area(domain.parameters["vertices"][None], p["xy"], p["radius"])
+            visible[outer] = bool(area.detach()[0] > 1e-9)
+        return visible[outer]
+
+    volumes = []
+    for region in regions:
+        bounds = tuple(region["z_bounds_cm"])
+        if "pieces" in region:
+            shell = region["interface_index"]
+            shapes = [disk(site, shell, bounds) - disk(site, shell - 1, bounds) if shell else disk(site, shell, bounds)
+                      for site in region["orbit_site_ids"] if represented(site, bounds)]
+            shape = union(shapes)
+        else:
+            shape = domain - union(disk(site, -1, bounds) for site in cylinders if represented(site, bounds))
+        volumes.append(MaterialVolume(region["label"], region["label"], (domain & shape).slice(bounds)))
+    return CadGeometry(domain, tuple(volumes), boundaries, name)
+
+
+
+class ChannelDesign(nn.Module):
+    """Map declared hexagonal lattice sites and ring parameters to axial assemblies."""
+    def __init__(self, definition, specification):
+        """Bind resolved model definitions to trainable channel geometry.
+
+        Parameters
+        ----------
+        definition : dict
+            Resolved physical model from ``inputs/model.toml``, supplied by the case adapter.
+        specification : dict
+            Resolved cycle settings from ``inputs/study.toml`` after scenario overrides.
+
+        Notes
+        -----
+        The case adapter loads model.toml and study.toml once and passes their resolved
+        dictionaries here. This constructor registers design parameters and fixed lattice
+        buffers without reading files.
+        """
+        super().__init__()
+        for name, value in specification["design"].items():
+            self.register_parameter(name, nn.Parameter(torch.tensor(value, dtype=torch.float64)))
+        sites = definition["lattice"]["sites"]
+        channel_types = definition["channel_types"]
+        channels = [channel_types[site["channel_type"]] for site in sites]
+        self.channel_ids = tuple(site["id"] for site in sites)
+        rings = [max(abs(site["q"]), abs(site["r"]), abs(site["q"] + site["r"])) for site in sites]
+        self.register_buffer("ring", torch.tensor(rings, dtype=torch.long))
+        self.register_buffer("fuelled", torch.tensor([channel["fuelled"] for channel in channels], dtype=torch.bool))
+        self.register_buffer("lattice_xy", torch.tensor([
+            [site["q"] + site["r"] / 2, math.sqrt(3) * site["r"] / 2] for site in sites], dtype=torch.float64))
+        self.axial_count = specification["axial_positions"]
+        self.register_buffer("z_edges_mm", torch.arange(self.axial_count + 1, dtype=torch.float64)
+                             * specification["assembly_height_mm"])
+        self.reference_interfaces = tuple(tuple(channel["reference_interfaces_mm"]) for channel in channels)
+        self.channel_materials = tuple(tuple(channel["materials"]) for channel in channels)
+        self.assembly_ids = tuple(f"{site}/axial/{level}" for site, fuelled in zip(self.channel_ids, self.fuelled)
+                                  if fuelled for level in range(self.axial_count))
+
+    def ring_pitches(self):
+        """Return the live radial ring-spacing increments.
 
         Returns
         -------
         torch.Tensor
-            Disk intersection area in cm² for each triangular cell.
+            Ring-spacing increments in mm, in outward ring order.
         """
-        cylinder = cylinders[site]
-        interface %= len(cylinder.interfaces_cm)
-        radius = cylinder.interfaces_cm[interface]
-        axial = isinstance(radius, Mapping)
-        key = (site, interface, bounds if axial else None)
-        if key not in areas:
-            areas[key] = circle_triangle_area(grid.vertices, cylinder.xy_cm, radius[bounds] if axial else radius)
-        return areas[key]
+        return self.pitch_mm
 
-    occupied = {}
-    columns = []
-    for region in regions:
-        bounds = tuple(region["z_bounds_cm"])
-        if "pieces" not in region:
-            if bounds not in occupied:
-                occupied[bounds] = sum(disk(site, -1, bounds) for site in cylinders)
-            area = grid.triangle_area - occupied[bounds]
-        else:
-            shell = region["interface_index"]
-            area = sum(disk(site, shell, bounds) - (disk(site, shell - 1, bounds) if shell else 0.)
-                       for site in region["orbit_site_ids"])
-        low, high = bounds
-        overlap = (torch.minimum(grid.z_edges[1:], tensor(high))
-                   - torch.maximum(grid.z_edges[:-1], tensor(low))).clamp_min(0.)
-        columns.append(((area / grid.triangle_area)[:, None] * (overlap / grid.z_edges.diff())[None, :]).flatten())
-    fractions = torch.stack(columns, dim=-1)
-    if float(fractions.detach().min()) < -2e-10 or float((fractions.detach().sum(-1) - 1).abs().max()) > 2e-10:
-        raise ArithmeticError("Cylinder material fractions do not partition the triangular domain")
-    return fractions.clamp_min(0.)
+    def forward(self):
+        """Map live ring parameters to channel and axial assembly geometry.
+
+        Returns
+        -------
+        dict
+            Channel coordinates and interfaces in mm; assembly coordinates, radii and axial
+            bounds in cm; assembly volumes in cm³ and fresh enrichment mass fractions. Axial
+            assembly identities run top to bottom.
+
+        Raises
+        ------
+        ValueError
+            A pitch, radius or enrichment is nonfinite or outside its physical range.
+        """
+        if (not bool(torch.isfinite(self.pitch_mm).all() & torch.isfinite(self.element_radius_mm).all()
+                     & torch.isfinite(self.enrichment).all())
+                or bool((self.pitch_mm <= 0).any() | (self.element_radius_mm <= 0).any()
+                        | (self.enrichment <= 0).any() | (self.enrichment >= 1).any())):
+            raise ValueError("Invalid ring pitch, homogenized element radius or enrichment")
+        pitches = self.ring_pitches()
+        scales = torch.cat((pitches.new_zeros(1), pitches.cumsum(0)
+                            / torch.arange(1, len(pitches) + 1, dtype=pitches.dtype,
+                                           device=pitches.device)))
+        centers_mm = self.lattice_xy * scales[self.ring, None]
+        interfaces_mm = []
+        for i, values in enumerate(self.reference_interfaces):
+            radii = self.pitch_mm.new_tensor(values)
+            if bool(self.fuelled[i]):
+                radii = radii + self.element_radius_mm[self.ring[i]] - radii[0]
+            interfaces_mm.append(radii)
+        fuel_ring = self.ring[self.fuelled].repeat_interleave(self.axial_count)
+        # Assembly zero is at the top; physical z increases bottom-to-top.
+        bounds_cm = torch.stack((self.z_edges_mm[:-1], self.z_edges_mm[1:]), dim=1).flip(0) / 10
+        bounds_cm = bounds_cm.repeat(int(self.fuelled.sum()), 1)
+        radius_cm = self.element_radius_mm[fuel_ring] / 10
+        return {
+            "channel_xy_mm": centers_mm,
+            "channel_interfaces_mm": tuple(interfaces_mm),
+            "assembly_xy_cm": centers_mm[self.fuelled].repeat_interleave(self.axial_count, 0) / 10,
+            "assembly_radius_cm": radius_cm,
+            "assembly_z_bounds_cm": bounds_cm,
+            "assembly_volume_cm3": math.pi * radius_cm.square() * (bounds_cm[:, 1] - bounds_cm[:, 0]),
+            "fresh_enrichment_mass_fraction": self.enrichment[fuel_ring],
+        }
