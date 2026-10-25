@@ -1,0 +1,63 @@
+# Single editable input for this manufactured demonstration; values are not evaluated data.
+
+[geometry]
+shape = [3, 3]
+pitch_cm = [1.6, 1.6]
+height_cm = 20.0
+initial_radius_cm = 0.45
+radius_bounds_cm = [0.25, 0.65]
+# x-min, x-max, y-min, y-max, bottom, top
+boundaries = ["reflective", "reflective", "reflective", "reflective", "reflective", "reflective"]
+
+[mesh]
+subdivisions = [24, 24, 2]
+refined_subdivisions = [36, 36, 3]
+
+[materials]
+energy_edges_eV = [0.0, 20000000.0]
+nuclides = ["U235", "I135", "Xe135", "Xe136"]
+initial_density_atoms_cm3 = [1.0e21, 0.0, 0.0, 0.0]
+capture_barns = [40.0, 0.0, 20000.0, 0.0]
+fission_barns = [60.0, 0.0, 0.0, 0.0]
+scatter_barns = [900.0, 0.0, 0.0, 0.0]
+neutrons_per_fission = 2.5
+energy_per_fission_eV = 200000000.0
+
+[materials.coolant]
+absorption_per_cm = 0.02
+scatter_per_cm = 1.0
+
+[chain]
+fission_yield_to_iodine = 0.06
+iodine_half_life_seconds = 20000.0
+xenon_half_life_seconds = 30000.0
+
+[history]
+power_W = 100000.0
+durations_days = [5.0, 5.0]
+
+[openmc]
+particles = 5000
+batches = 80
+inactive = 20
+seed = 47183
+threads = 2
+
+[optimization]
+target_keff = 1.0
+design_updates = 2
+fit_iterations = 35
+design_iterations = 25
+calibration_scale = 0.002
+
+[verification]
+native_absolute_tolerance = 0.005
+native_sigma_multiplier = 3.0
+native_maximum_standard_error = 0.002
+calibration_tolerance = 0.00005
+gradient_rtol = 0.0002
+gradient_coordinate_step = 0.0001
+volume_rtol = 0.000000001
+refined_keff_tolerance = 0.005
+depletion_rtol = 0.0000000001
+energy_rtol = 0.0000000001

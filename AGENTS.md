@@ -22,6 +22,30 @@ shared packages so the design remains small.
 | `designs/<name>/` | Physical geometry, materials, scenarios, design variables, objectives and thin adapters or entry scripts |
 | `tests/` | Independent numerical references, interface checks and small regression fixtures |
 
+## Standard design structure
+
+Use **`designs/wr_1/` as the organization template for every subsequent design
+and analysis**, including small tutorials and workflow demonstrations. Keep the
+same directory roles; create only the folders and files the case actually needs.
+
+| Within `designs/<name>/` | Contents |
+| --- | --- |
+| `README.md`, `goals.md` | Entry point, reproduction commands, agreed objectives and acceptance criteria |
+| `build_geometry.py` | The single physical geometry construction |
+| `inputs/` | Editable TOML configuration, including `model.toml` and `study.toml` when multiple scenarios need it |
+| `model/` | Small case, design-variable, material and calibration bindings to shared interfaces |
+| `scripts/` | Thin preparation and execution entry points; one preparation script per optimization step when needed |
+| `scripts/plotting/` | Design-specific plotting entry points |
+| `results/<study>/optimization_step_<n>/figures/` | Retained figures, using the existing figure-only Git rules |
+| `reports/` | Design reports and supporting interpretation when needed |
+
+Put configuration under `inputs/` and execution entry points under `scripts/`,
+rather than directly beside the design README. Keep new raw runs, numerical
+records and diagnostics under `runs/<name>/` as described below. Do not copy
+WR-1's physics, historical files or full folder tree just to reproduce its layout.
+Reusable numerical functionality still belongs in `src/`; a new design should
+add only its physical definitions and the bindings it needs.
+
 ## Adding or extending a design
 
 1. Inspect the relevant shared interfaces before implementing a capability. Use

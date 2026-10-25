@@ -30,9 +30,9 @@ flowchart LR
 TOML supplies the dimensions, material properties, operating conditions and
 optimization goals. One shared **3D build123d geometry** assigns a material to each
 volume. GEOUNED converts its STEP solids into OpenMC's analytic surfaces and cells;
-Gmsh supplies the diffusion mesh, with material mapping derived from the same
-geometry definition. FreeCAD runs inside the converter; there is no separate
-FreeCAD model to maintain.
+Diffusion adapters derive meshes and material fractions from the same geometry
+definition; Gmsh handles meshing of CAD solids and sector faces. FreeCAD runs
+inside the converter; there is no separate FreeCAD model to maintain.
 
 **WR-1 first builds a background mesh, then assigns properties to its cells:**
 
@@ -246,6 +246,16 @@ cross sections. It demonstrates inputs → CAD → diffusion → gradients → o
 with one input file and one short script, and writes its final CAD to
 `runs/slab/geometry.step`.
 
+For the complete local workflow, run the [nine-pin lattice demonstration](designs/small_lattice/README.md):
+
+```sh
+.venv/bin/python -m designs.small_lattice.scripts.run_optimization
+```
+
+It adds actual OpenMC transport, a ten-day depletion history, material calibration,
+radius optimization and a new OpenMC verification. Manufactured cross sections
+keep the demonstration self-contained; no evaluated nuclear-data download is needed.
+
 Full WR-1 runs require evaluated nuclear data and at least 10 GiB of free space
 for preparation. Follow the [WR-1 running instructions](designs/wr_1/README.md#nuclear-data-and-running-a-scenario).
 Only figures are versioned under design result folders; new runs regenerate
@@ -273,15 +283,17 @@ license has not yet been selected.
 
 ## Create your own design
 
-Start small: copy the slab tutorial and replace its geometry and objective.
+Use the small lattice as a complete workflow template, following the same directory
+roles as WR-1. The slab tutorial above is a smaller introduction to the solver alone.
 
 ```sh
-cp -R designs/slab designs/my_case
-.venv/bin/python -m designs.my_case.run
+cp -R designs/small_lattice designs/my_case
+.venv/bin/python -m designs.my_case.scripts.run_optimization
 ```
 
-1. **Describe the case.** Put dimensions, material data, parameter bounds and goals
-   in `model.toml`, the single source of truth for the design.
+1. **Describe the case.** Record the agreed objective in `goals.md`. Put dimensions,
+   material data, parameter bounds and executable settings in `inputs/model.toml`,
+   the single source of truth for the design's configuration.
 2. **Define the geometry once.** Build solids with build123d in a small
    `build_geometry.py` script. Bind region names, materials and boundary faces with
    `CadGeometry.from_solids(...)`. Shared adapters generate OpenMC cells and a
@@ -292,6 +304,10 @@ cp -R designs/slab designs/my_case
    [`CaseModel` and `CycleCase` interfaces](src/coupling/cases.py) connect your
    case to shared preparation, calibration and optimization. The
    [WR-1 adapter](designs/wr_1/model/case.py) demonstrates the complete integration.
+
+Keep case bindings in `model/`, thin run scripts in `scripts/`, and design-specific
+plotting in `scripts/plotting/`. Retain figures under `results/`; new raw calculations
+and numerical records go under `runs/<design>/` at the repository root.
 
 Native and surrogate models **share the physical geometry by default**. A simpler
 surrogate layout is an explicit choice through `surrogate_mesh`, with material
