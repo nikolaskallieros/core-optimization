@@ -188,7 +188,16 @@ constraint gradients can require additional backward passes.
 
 ## Install
 
-From a checkout, with [micromamba installed](https://mamba.readthedocs.io/en/latest/installation/micromamba-installation.html):
+With Git and [micromamba installed](https://mamba.readthedocs.io/en/latest/installation/micromamba-installation.html),
+first clone the repository and enter its directory:
+
+```sh
+git clone https://github.com/nikolaskallieros/core-optimization.git
+cd core-optimization
+```
+
+Run the installation and verification commands below from this repository root
+(`core-optimization/`). Both environments will be created inside that directory:
 
 ```sh
 micromamba --no-rc create -y -p "$PWD/.venv" -f environment.yml
