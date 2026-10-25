@@ -1,4 +1,4 @@
-"""Keep the installed library usable without an example checkout."""
+"""Keep the installed library usable without a design checkout."""
 import os
 import subprocess
 import sys
@@ -26,7 +26,7 @@ for name in ('coupling', 'depletion', 'diffusion_surrogate', 'fuel_cycle',
         importlib.import_module(module.name)
     for exported in getattr(package, '__all__', ()):
         getattr(package, exported)
-assert not any(name == 'examples' or name.startswith('examples.') for name in sys.modules)
+assert not any(name == 'designs' or name.startswith('designs.') for name in sys.modules)
 assert importlib.util.find_spec('infrastructure') is None
 from runtime.paths import PROJECT_ROOT, NUCLEAR_DATA, NUCLEAR_CHAINS
 assert PROJECT_ROOT == Path.cwd()

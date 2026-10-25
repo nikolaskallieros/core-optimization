@@ -208,7 +208,7 @@ def load_configuration(path, scenario):
 class CaseModel:
     """Case physics supplied to the shared cycle, calibration and search engines.
 
-    Factories receive physical values, not a repository root or an example name.
+    Factories receive physical values, not a repository root or a design name.
     design() returns a Torch module with the declared trainable parameters.
     transport(**values) returns the native region/material description;
     inventory(values) supplies its isotope inventories and fresh-fuel recipe.

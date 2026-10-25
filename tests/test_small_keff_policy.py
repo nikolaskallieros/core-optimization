@@ -1,5 +1,5 @@
 """Constraint-policy checks with analytic fixtures; no finite differences."""
-from examples.wr_1 import WR1_ROOT
+from designs.wr_1 import WR1_ROOT
 from copy import deepcopy
 import json
 from pathlib import Path

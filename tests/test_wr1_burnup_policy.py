@@ -1,5 +1,5 @@
 """WR-1 search bounds and uncapped burnup; no finite differences."""
-from examples.wr_1 import WR1_ROOT
+from designs.wr_1 import WR1_ROOT
 from copy import deepcopy
 from types import SimpleNamespace
 
@@ -8,7 +8,7 @@ import pytest
 import torch
 
 from fuel_cycle.residence import FuelMap, J_PER_MWD, metrics
-from examples.wr_1.model.case import study
+from designs.wr_1.model.case import study
 from coupling.optimization import design_loss, native_summary, prediction_rank, rescore_prediction
 from runtime.io import load_state
 
@@ -40,7 +40,7 @@ def test_native_period_range_matches_optimizer_above_the_old_limit(monkeypatch, 
     days : float
         Cycle period in days above the removed historical limit.
     """
-    from examples.wr_1.model.case import study
+    from designs.wr_1.model.case import study
     from coupling.history import native_history
 
     case, options = settings()

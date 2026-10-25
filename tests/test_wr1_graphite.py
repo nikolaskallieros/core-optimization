@@ -1,5 +1,5 @@
 """Graphite material partition and analytic geometry derivatives; no finite differences."""
-from examples.wr_1 import WR1_ROOT
+from designs.wr_1 import WR1_ROOT
 from copy import deepcopy
 import math
 from types import SimpleNamespace
@@ -10,9 +10,9 @@ import torch
 from diffusion_surrogate.hexagonal import C6Grid
 from geometry.intersections import circle_triangle_area
 from geometry.diffusion import material_fractions
-from examples.wr_1.build_geometry import parameterized_geometry
-from examples.wr_1.model.case import study
-from examples.wr_1.model.graphite import add_graphite, graphite_mapping, initialize_graphite
+from designs.wr_1.build_geometry import parameterized_geometry
+from designs.wr_1.model.case import study
+from designs.wr_1.model.graphite import add_graphite, graphite_mapping, initialize_graphite
 from optimization.objectives import joint_merit
 from diffusion_surrogate.regional import shared_geometry
 from diffusion_surrogate.symmetry import SectorInputError

@@ -14,8 +14,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from coupling.execution import prepare_case
-from examples.wr_1.model.case import study
-from examples.wr_1.build_geometry import parameterized_geometry
+from designs.wr_1.model.case import study
+from designs.wr_1.build_geometry import parameterized_geometry
 from geometry import CadGeometry
 from geometry.diffusion import discretize
 

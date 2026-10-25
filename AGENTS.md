@@ -1,9 +1,9 @@
 # Agent instructions
 
 Core Optimization builds OpenMC-calibrated, differentiable diffusion models for
-reactor-design studies. Examples define the physical problem; shared packages
+reactor-design studies. Designs define the physical problem; shared packages
 implement the reusable methods. Adding a new design may require extending the
-shared packages so the example remains small.
+shared packages so the design remains small.
 
 ## Code ownership
 
@@ -19,23 +19,23 @@ shared packages so the example remains small.
 | `src/plotting/` | Reusable figures from explicit results and caller-defined geometry layers |
 | `src/runtime/` | Serialization, workspace paths, process control and autograd memory storage |
 | `src/get_nuclear_data/` | Generic nuclear-data acquisition and processing |
-| `examples/<name>/` | Physical geometry, materials, scenarios, design variables, objectives and thin adapters or entry scripts |
+| `designs/<name>/` | Physical geometry, materials, scenarios, design variables, objectives and thin adapters or entry scripts |
 | `tests/` | Independent numerical references, interface checks and small regression fixtures |
 
 ## Adding or extending a design
 
 1. Inspect the relevant shared interfaces before implementing a capability. Use
-   `CaseModel` and `CycleCase` to connect a coupled example to shared execution.
-2. Keep examples focused on physical definitions and case-specific choices.
+   `CaseModel` and `CycleCase` to connect a coupled design to shared execution.
+2. Keep designs focused on physical definitions and case-specific choices.
    Solvers, calibration engines, optimization loops and reusable data processing
    belong in `src/`.
 3. When a new design reveals a missing reusable operation, extend or refactor the
    shared code as part of the task. Pass the case-specific choices through explicit
-   parameters or callbacks instead of duplicating the workflow in the example.
-4. Keep shared packages independent of examples: no imports from `examples`,
-   example-name switches or embedded assumptions about a particular reactor.
+   parameters or callbacks instead of duplicating the workflow in the design.
+4. Keep shared packages independent of designs: no imports from `designs`,
+   design-name switches or embedded assumptions about a particular reactor.
 5. Keep physical constants, geometry assumptions and genuinely case-specific
-   objective definitions with the example. Extract general operations and objective
+   objective definitions with the design. Extract general operations and objective
    building blocks; moving case-specific code into `src/` does not make it generic.
 6. Exercise new shared behavior with a small independent case and check existing
    callers. Prefer extending existing interfaces to adding parallel frameworks or
@@ -48,7 +48,7 @@ category before introducing another package or a catch-all utilities folder.
 
 ## Optimization goals: read, understand and clarify before proceeding
 
-- Define new optimization goals in `examples/<name>/goals.md`. Create or update
+- Define new optimization goals in `designs/<name>/goals.md`. Create or update
   this file from the user's agreed goals before starting the optimization. For
   multiple scenarios, identify which goals apply to each scenario.
 - Read the applicable `goals.md` before starting, resuming or changing an
@@ -65,21 +65,21 @@ category before introducing another package or a catch-all utilities folder.
 - If the goals file is missing, record the user's stated goals first and ask about
   anything unresolved. Existing inputs and historical results do not establish
   agreement on new goals.
-- `goals.md` records the agreed intent; the example's TOML files are its executable
+- `goals.md` records the agreed intent; the design's TOML files are its executable
   configuration. Keep them consistent. If they disagree, stop and ask the user
   before changing or running the optimization. Record clarified decisions in
   `goals.md` and update the corresponding inputs before continuing.
 
 ## Configuration and scientific contracts
 
-- Read scenario values through the resolved example configuration. Keep one
+- Read scenario values through the resolved design configuration. Keep one
   executable source for each setting; do not duplicate defaults in scripts or
   library code. Generated inputs are records of a run, not editable source inputs.
 - Geometry follows TOML → build123d solids → shared numerical adapters.
-  Keep the small geometry builder with the example. Use `CadGeometry.from_solids`
+  Keep the small geometry builder with the design. Use `CadGeometry.from_solids`
   to bind physical regions, materials and boundary faces. Extend `src/geometry/`
   for reusable operations; do not add an independent OpenMC layout, a duplicate
-  FreeCAD model or a hand-written example fraction map.
+  FreeCAD model or a hand-written design fraction map.
 - Export one `geometry.step` per prepared case and replace it when regenerating
   that case. It contains build123d solids, material identities and boundary faces.
   A saved STEP is fixed geometry. Preserve the live parametric object for shape
@@ -111,7 +111,7 @@ category before introducing another package or a catch-all utilities folder.
   Use concrete facts instead of vague status labels such as "provisional". A
   passing software test does not revalidate a retained reactor-design result.
 - Preserve saved scientific evidence. Write new calculations under `runs/`; only
-  figures are versioned in example result folders. Compare actual settings and
+  figures are versioned in design result folders. Compare actual settings and
   model definitions when resuming. After changing model or solver behavior, use a
   new run and calibration. Do not weaken tolerances to make a check pass.
 
@@ -145,7 +145,7 @@ category before introducing another package or a catch-all utilities folder.
 | Case interfaces and package independence | `.venv/bin/python -m pytest -q tests/test_case_interfaces.py tests/test_package_boundaries.py` |
 | Python test suite | `.venv/bin/python -m pytest -q tests` |
 | Complete bounded installation checks, including the test suite and native OpenMC | `.venv/bin/python tests/check_installation.py` |
-| Minimal geometry-optimization tutorial | `.venv/bin/python -m examples.slab.run` |
+| Minimal geometry-optimization tutorial | `.venv/bin/python -m designs.slab.run` |
 | CAD, native cells and diffusion volumes for all WR-1 scenarios | `.venv/bin/python tests/check_cad_geometry.py` |
 
 The bounded checks use small fixtures and do not require a full continuous-energy

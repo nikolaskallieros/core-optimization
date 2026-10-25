@@ -1,4 +1,4 @@
-"""Prepare and run a case through the same public interfaces used by examples."""
+"""Prepare and run a case through the same public interfaces used by designs."""
 
 import json
 

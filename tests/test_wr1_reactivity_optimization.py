@@ -1,5 +1,5 @@
 """Analytic BOL-objective and per-channel constraint checks, without transport or FD."""
-from examples.wr_1 import WR1_ROOT
+from designs.wr_1 import WR1_ROOT
 from types import SimpleNamespace
 import unittest
 
@@ -7,7 +7,7 @@ import numpy as np
 import torch
 
 from optimization.solvers import minimize
-from examples.wr_1.model.case import study
+from designs.wr_1.model.case import study
 from fuel_cycle.residence import FuelMap
 from coupling.optimization import (assess_native, bol_state_key, channel_temporal_check,
     check_residence_gradient_trace, corrected_keff, design_loss, keff_correction, merit,

@@ -1,6 +1,6 @@
 """Pure-BU and hard mass/EOL gates against the integrated optimizer; no solves."""
 from runtime.paths import PROJECT_ROOT
-from examples.wr_1 import WR1_ROOT
+from designs.wr_1 import WR1_ROOT
 from copy import deepcopy
 import sys
 import unittest
@@ -11,7 +11,7 @@ ROOT = WR1_ROOT
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from coupling import optimization
-from examples.wr_1.model.case import study
+from designs.wr_1.model.case import study
 from optimization.fuel_constraints import fuel_mass_check
 
 

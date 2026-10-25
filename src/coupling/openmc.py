@@ -16,7 +16,7 @@ def build(case, directory, *, geometry=None):
     directory : str or pathlib.Path
         Calculation directory containing the OpenMC XML and native output files.
     geometry : geometry.CadGeometry or None, optional
-        Actual CAD from the example's builder. Otherwise load case["cad_geometry"]
+        Actual CAD from the design's builder. Otherwise load case["cad_geometry"]
         as a STEP path or the analytical parameter record. GEOUNED converts the
         resulting build123d solids into analytic OpenMC surfaces and cells.
 

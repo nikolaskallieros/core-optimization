@@ -3,7 +3,7 @@ from pathlib import Path
 from coupling.cases import CaseModel, CycleCase, load_configuration
 from materials.inventory import IsotopicInventory
 from runtime.paths import NUCLEAR_DATA, RUNS
-from examples.wr_1 import WR1_ROOT
+from designs.wr_1 import WR1_ROOT
 import math
 import numpy as np
 from materials.composition import transport_atoms

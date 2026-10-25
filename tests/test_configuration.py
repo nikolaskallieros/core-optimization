@@ -248,8 +248,8 @@ def test_wr1_model_uses_the_declared_geometry_materials_and_goal(tmp_path):
         Isolated temporary directory supplied by pytest.
     """
     import shutil
-    from examples.wr_1.model.case import study
-    from examples.wr_1 import WR1_ROOT
+    from designs.wr_1.model.case import study
+    from designs.wr_1 import WR1_ROOT
 
     shutil.copytree(WR1_ROOT / "inputs", tmp_path / "inputs")
     source = tmp_path / "inputs/study.toml"
@@ -279,8 +279,8 @@ def test_graphite_mass_density_controls_the_native_material(tmp_path, step):
         WR-1 graphite scenario number under test.
     """
     import shutil
-    from examples.wr_1.model.case import study
-    from examples.wr_1 import WR1_ROOT
+    from designs.wr_1.model.case import study
+    from designs.wr_1 import WR1_ROOT
 
     shutil.copytree(WR1_ROOT / "inputs", tmp_path / "inputs")
     source = tmp_path / "inputs/study.toml"

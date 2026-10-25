@@ -294,7 +294,7 @@ class CadGeometry:
 
     Notes
     -----
-    Adapters consume this object or its STEP export. They never read an example's
+    Adapters consume this object or its STEP export. They never read an design's
     TOML or invent a second physical geometry. Live tensors are preserved when
     consuming the object; reading a saved STEP restores a fixed geometry.
     """

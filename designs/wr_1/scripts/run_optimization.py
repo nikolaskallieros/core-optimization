@@ -1,6 +1,6 @@
 """Run one WR-1 scenario using the shared native/surrogate cycle engine."""
 from coupling.execution import run_case
-from examples.wr_1.model.case import new_run
+from designs.wr_1.model.case import new_run
 
 STEP = 1
 

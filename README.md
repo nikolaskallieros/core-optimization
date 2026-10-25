@@ -12,7 +12,7 @@ steps**, then evaluate the proposed design with OpenMC and refresh the fit. Grad
 connect a goal at discharge to the design decisions that shaped the entire fuel history.
 
 [WR-1 results](#wr-1-results) · [Performance](#recorded-performance) ·
-[Install](#install) · [Create your own example](#create-your-own-example)
+[Install](#install) · [Create your own design](#create-your-own-design)
 
 ## From transport calculations to design gradients
 
@@ -33,12 +33,12 @@ volume. GEOUNED converts its STEP solids into OpenMC's analytic surfaces and cel
 Gmsh derives a numerical mesh for diffusion from those same solids. FreeCAD runs
 inside the converter; there is no separate FreeCAD model to maintain.
 Design updates feed the same geometry and material definitions. The current
-adapter limits are described under [Create your own example](#create-your-own-example).
+adapter limits are described under [Create your own design](#create-your-own-design).
 
 **One scalar objective. One backward pass. Derivatives for every selected design
 parameter.** PyTorch's [reverse-mode automatic differentiation](https://docs.pytorch.org/docs/2.7/notes/autograd.html)
 computes these derivatives together, without a separate perturbed transport run for
-each parameter. The WR-1 examples use this same approach for both 12-variable and
+each parameter. The WR-1 studies use this same approach for both 12-variable and
 33-variable designs.
 
 - **Optimize across the fuel history.** Differentiate through diffusion, depletion,
@@ -73,7 +73,7 @@ Case 7's minimum k-effective was 0.99915 against the study target of 1.002.
 Its power-tally statistical errors also exceeded the chosen precision limits.
 Case 2 met those criteria and reached 8,416 MWd/tHM.
 
-![WR-1 geometry and channel power: initial design, case 2 and case 7.](examples/wr_1/results/wr1_optimization/optimization_step_1/figures/design_comparison.png)
+![WR-1 geometry and channel power: initial design, case 2 and case 7.](designs/wr_1/results/wr1_optimization/optimization_step_1/figures/design_comparison.png)
 
 *Initial geometry and channel power (left), case 2 (center), and the
 final evaluated design in the table, case 7 (right).*
@@ -82,7 +82,7 @@ The full search made **33 gradient-based updates between eight OpenMC reference
 histories**. The parameter plot shows how the optimizer redistributed enrichment,
 changed fuel radii and ring spacing, and extended the cycle duration as the search progressed.
 
-![Changes to WR-1 channel positions, fuel radii, enrichments and cycle duration over the step-1 search.](examples/wr_1/results/wr1_optimization/optimization_step_1/figures/design_changes.png)
+![Changes to WR-1 channel positions, fuel radii, enrichments and cycle duration over the step-1 search.](designs/wr_1/results/wr1_optimization/optimization_step_1/figures/design_changes.png)
 
 *Initial design to case 7, showing the parameter changes behind the burnup increase.
 All 12 objective derivatives come from the same backward pass.*
@@ -91,11 +91,11 @@ The OpenMC histories show the initial and final designs over all three cycles.
 Their burnup panels track **peak assembly burnup**; the table above reports
 **mean discharge burnup**.
 
-![Initial WR-1 design: OpenMC criticality, accumulated assembly burnup, channel power and axial power over three 80-day cycles.](examples/wr_1/results/wr1_optimization/optimization_step_1/figures/history_initial.png)
+![Initial WR-1 design: OpenMC criticality, accumulated assembly burnup, channel power and axial power over three 80-day cycles.](designs/wr_1/results/wr1_optimization/optimization_step_1/figures/history_initial.png)
 
 *Initial design: 80 days per cycle and 3,768 MWd/tHM peak assembly burnup.*
 
-![WR-1 case 7: OpenMC criticality, accumulated assembly burnup, channel power and axial power over three 327.7-day cycles.](examples/wr_1/results/wr1_optimization/optimization_step_1/figures/history_native_07.png)
+![WR-1 case 7: OpenMC criticality, accumulated assembly burnup, channel power and axial power over three 327.7-day cycles.](designs/wr_1/results/wr1_optimization/optimization_step_1/figures/history_native_07.png)
 
 *Case 7: 327.7 days per cycle and 29,391 MWd/tHM peak assembly burnup, with
 27,458 MWd/tHM mean discharge burnup.*
@@ -103,7 +103,7 @@ Their burnup panels track **peak assembly burnup**; the table above reports
 <details>
 <summary>See the full optimization trajectory and OpenMC checks</summary>
 
-![Step-1 surrogate updates, OpenMC evaluations, acceptance checks and parameter histories.](examples/wr_1/results/wr1_optimization/optimization_step_1/figures/optimization.png)
+![Step-1 surrogate updates, OpenMC evaluations, acceptance checks and parameter histories.](designs/wr_1/results/wr1_optimization/optimization_step_1/figures/optimization.png)
 
 Diamonds mark OpenMC evaluations that met the study's criteria.
 The lower panels show case 7.
@@ -118,7 +118,7 @@ original 12 variables in the same differentiable workflow. The goals combined
 discharge burnup, beginning-of-cycle excess reactivity and the largest channel-power
 swing during the final cycle.
 
-![WR-1 graphite-sleeve design: three axial layouts, all 21 sleeve thicknesses, and changes to pitches, fuel radii and enrichments.](examples/wr_1/results/wr1_optimization/optimization_step_5/figures/design_changes.png)
+![WR-1 graphite-sleeve design: three axial layouts, all 21 sleeve thicknesses, and changes to pitches, fuel radii and enrichments.](designs/wr_1/results/wr1_optimization/optimization_step_5/figures/design_changes.png)
 
 *Each sleeve thickness receives its own derivative, together with the other design
 parameters, in one objective backward pass. The figure shows OpenMC case 1.*
@@ -132,13 +132,13 @@ parameters, in one objective backward pass. The figure shows OpenMC case 1.*
 
 Case 1 reduced power swing by about **11%** relative to the initial graphite
 design, with slightly lower burnup and higher initial reactivity. Its power-tally
-statistical errors exceeded the chosen precision limits. This example shows how
+statistical errors exceeded the chosen precision limits. This study shows how
 additional geometry variables use the same model and backward pass.
 
 <details>
 <summary>See the graphite optimization trajectory</summary>
 
-![Step-5 surrogate proposals and OpenMC comparisons for burnup, power swing, reactivity and parameter changes.](examples/wr_1/results/wr1_optimization/optimization_step_5/figures/optimization.png)
+![Step-5 surrogate proposals and OpenMC comparisons for burnup, power swing, reactivity and parameter changes.](designs/wr_1/results/wr1_optimization/optimization_step_5/figures/optimization.png)
 
 Gray markers and bars are the earlier step-3 design without graphite; the table
 above compares against the initial graphite design. Red crosses mark missed native
@@ -148,7 +148,7 @@ checks. The final plotted proposal has no completed OpenMC evaluation.
 
 These are retained computational studies. “Accepted” means the study's recorded
 numerical criteria passed. The figures demonstrate the method; they do not establish
-experimental validation or a global optimum. [Reproduction notes](examples/wr_1/README.md#reproducibility)
+experimental validation or a global optimum. [Reproduction notes](designs/wr_1/README.md#reproducibility)
 describe the historical runs and current replay limitations.
 
 ## Recorded performance
@@ -211,18 +211,18 @@ installation has not yet been verified.
 **Run your first geometry optimization without downloading nuclear data:**
 
 ```sh
-.venv/bin/python -m examples.slab.run
+.venv/bin/python -m designs.slab.run
 ```
 
-The [slab tutorial](examples/slab/README.md) adjusts its width from **20.000 cm to
+The [slab tutorial](designs/slab/README.md) adjusts its width from **20.000 cm to
 about 8.631 cm** to reach **k-effective = 1.000000**, using manufactured one-group
 cross sections. It demonstrates inputs → CAD → diffusion → gradients → optimization
 with one input file and one short script, and writes its final CAD to
 `runs/slab/geometry.step`.
 
 Full WR-1 runs require evaluated nuclear data and at least 10 GiB of free space
-for preparation. Follow the [WR-1 running instructions](examples/wr_1/README.md#nuclear-data-and-running-a-scenario).
-Only figures are versioned under example result folders; new runs regenerate
+for preparation. Follow the [WR-1 running instructions](designs/wr_1/README.md#nuclear-data-and-running-a-scenario).
+Only figures are versioned under design result folders; new runs regenerate
 numerical records locally and preserve the retained figures.
 
 <details>
@@ -232,7 +232,7 @@ Installation checks cover analytical diffusion, first derivatives, depletion,
 case interfaces and a small native OpenMC calculation. They verify the current
 software; the retained WR-1 campaigns predate the refactoring. Strict replay of
 the historical step-one trace inventories remains unresolved on the tested macOS
-environment, as described in the [reproducibility notes](examples/wr_1/README.md#reproducibility).
+environment, as described in the [reproducibility notes](designs/wr_1/README.md#reproducibility).
 
 Within an optimization batch, fitted correction coefficients and reference spectral
 shapes remain fixed. Changing the surrogate representation requires a new fit.
@@ -245,17 +245,17 @@ license has not yet been selected.
 
 </details>
 
-## Create your own example
+## Create your own design
 
 Start small: copy the slab tutorial and replace its geometry and objective.
 
 ```sh
-cp -R examples/slab examples/my_case
-.venv/bin/python -m examples.my_case.run
+cp -R designs/slab designs/my_case
+.venv/bin/python -m designs.my_case.run
 ```
 
 1. **Describe the case.** Put dimensions, material data, parameter bounds and goals
-   in `model.toml`, the single source of truth for the example.
+   in `model.toml`, the single source of truth for the design.
 2. **Define the geometry once.** Build solids with build123d in a small
    `build_geometry.py` script. Bind region names, materials and boundary faces with
    `CadGeometry.from_solids(...)`. Shared adapters generate OpenMC cells and a
@@ -265,7 +265,7 @@ cp -R examples/slab examples/my_case
 4. **Add OpenMC and a fuel history when needed.** The
    [`CaseModel` and `CycleCase` interfaces](src/coupling/cases.py) connect your
    case to shared preparation, calibration and optimization. The
-   [WR-1 adapter](examples/wr_1/model/case.py) demonstrates the complete integration.
+   [WR-1 adapter](designs/wr_1/model/case.py) demonstrates the complete integration.
 
 Native and surrogate models **share the physical geometry by default**. A simpler
 surrogate layout is an explicit choice through `surrogate_mesh`, with material
@@ -310,8 +310,8 @@ by exterior and internal patches is rejected. Direct tetrahedral diffusion
 currently supports vacuum and reflective boundaries; WR-1's sector adapter also
 supports its periodic planes.
 
-Your case belongs in `examples/`. Shared packages live directly under `src/`;
-adding a new example does not require copying their numerical engines.
+Your case belongs in `designs/`. Shared packages live directly under `src/`;
+adding a new design does not require copying their numerical engines.
 
 | Package | Responsibility |
 | --- | --- |

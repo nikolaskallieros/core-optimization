@@ -1,6 +1,6 @@
 """Prepare the declared WR-1 step 3 without running neutron transport."""
 from coupling.execution import prepare_case
-from examples.wr_1.model.case import new_run
+from designs.wr_1.model.case import new_run
 
 
 def main():

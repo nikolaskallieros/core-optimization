@@ -1,6 +1,6 @@
 """Analytical mass and constrained-proposal checks; no finite differences."""
 from runtime.paths import PROJECT_ROOT
-from examples.wr_1 import WR1_ROOT
+from designs.wr_1 import WR1_ROOT
 import copy
 import math
 import sys
@@ -12,7 +12,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from optimization.fuel_constraints import (fuel_mass_check, fuel_mass_kg, heavy_metal_mass_kg,
                                       native_fuel_mass_check)
 from optimization.solvers import project_quadratic_bound
-from examples.wr_1.model.case import study
+from designs.wr_1.model.case import study
 
 
 class FuelMassTests(unittest.TestCase):

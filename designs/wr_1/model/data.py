@@ -7,7 +7,7 @@ from get_nuclear_data.depletion import prepare_depletion_data
 from get_nuclear_data.thermal import extend_thermal_scattering
 from coupling.cases import load_configuration
 from runtime.paths import NUCLEAR_DATA, NUCLEAR_CHAINS, NUCLEAR_INPUTS
-from examples.wr_1 import WR1_ROOT
+from designs.wr_1 import WR1_ROOT
 
 MINIMUM_FREE_BYTES = 10 * 1024**3
 

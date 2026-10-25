@@ -1,4 +1,4 @@
-from examples.wr_1 import WR1_ROOT
+from designs.wr_1 import WR1_ROOT
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -38,7 +38,7 @@ def test_sector_volumes_and_physical_multiplicity():
     from fixtures.small_case import SmallDesign, make_case
     from diffusion_surrogate.hexagonal import C6Grid
     from geometry.diffusion import material_fractions
-    from examples.wr_1.build_geometry import parameterized_geometry
+    from designs.wr_1.build_geometry import parameterized_geometry
     design, case = SmallDesign(ROOT), make_case(ROOT)
     grid = C6Grid(case["geometry"]["apothem_cm"], 8, design.z_edges_mm.numpy() / 10,
                   symmetry_boundary="reflective")
@@ -210,7 +210,7 @@ def test_shared_coefficient_roundtrip_preserves_fitted_values_near_bounds():
 def test_small_shared_spatial_bases_keep_the_two_outer_half_channels_equivalent():
     """Verify small shared spatial bases keep the two outer half channels equivalent."""
     from fixtures.small_case import make_case
-    from examples.wr_1.model.calibration import equivalence_bases
+    from designs.wr_1.model.calibration import equivalence_bases
     case = make_case(ROOT)
     regions = case["regions"]
     lower = next(i for i, r in enumerate(regions) if r["label"] == "outer_lower/axial/2")
@@ -238,9 +238,9 @@ def test_basis_transfer_preserves_diffusion_solution_and_rejects_incompatible_fi
     """Verify basis transfer preserves diffusion solution and rejects incompatible fields."""
     from fixtures.small_case import SmallDesign, definition
     from coupling.calibration import transfer_coefficients
-    from examples.wr_1.model.calibration import make_surrogate as WR1Surrogate, equivalence_bases
+    from designs.wr_1.model.calibration import make_surrogate as WR1Surrogate, equivalence_bases
     from geometry.diffusion import discretize
-    from examples.wr_1.build_geometry import parameterized_geometry
+    from designs.wr_1.build_geometry import parameterized_geometry
     from runtime.io import load_state
     state = load_state(FIXTURES / "small_cycle_states/fresh.json")
     case = state["case"]

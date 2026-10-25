@@ -1,5 +1,5 @@
 """Axial sleeve geometry, native cell partition and analytic derivatives; no FD."""
-from examples.wr_1 import WR1_ROOT
+from designs.wr_1 import WR1_ROOT
 from copy import deepcopy
 import hashlib
 import json
@@ -13,8 +13,8 @@ import torch
 
 from diffusion_surrogate.hexagonal import C6Grid
 from geometry.diffusion import material_fractions
-from examples.wr_1.build_geometry import parameterized_geometry
-from examples.wr_1.model.case import study
+from designs.wr_1.build_geometry import parameterized_geometry
+from designs.wr_1.model.case import study
 from coupling.optimization import project
 from optimization.design import set_parameters
 from coupling.openmc import build

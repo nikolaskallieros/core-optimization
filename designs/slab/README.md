@@ -8,7 +8,7 @@ optimized dimension. All numerical algorithms come from the shared packages.
 After [installing the project](../../README.md#install), run from the repository root:
 
 ```sh
-.venv/bin/python -m examples.slab.run
+.venv/bin/python -m designs.slab.run
 ```
 
 The default case produces approximately:
@@ -65,10 +65,10 @@ The 24-cell result differs slightly because of spatial discretization. The
 [tutorial regression](../../tests/test_slab_tutorial.py) checks this independent
 analytical solution as well as the optimized target and sensitivity sign.
 
-## Make a new example
+## Make a new design
 
-Copy this directory to `examples/my_case`, then edit `model.toml` and the geometry
-in `run.py`. Run it with `.venv/bin/python -m examples.my_case.run`.
+Copy this directory to `designs/my_case`, then edit `model.toml` and the geometry
+in `run.py`. Run it with `.venv/bin/python -m designs.my_case.run`.
 
 For a new 3D layout, build the actual solids with build123d and bind their material
 keys with `CadGeometry.from_solids`. The adapters derive analytic OpenMC cells
@@ -96,7 +96,7 @@ live parameterization for differentiation: STEP stores fixed solids, not
 PyTorch's computation graph. Analytical helper lengths are in cm; direct
 build123d and STEP lengths are in mm.
 
-The box mesh is Cartesian. The WR-1 example uses Gmsh to mesh the CAD sector face
+The box mesh is Cartesian. The WR-1 design uses Gmsh to mesh the CAD sector face
 and exact cylinder intersections to retain moving-interface derivatives.
 General solids use `discretize(cad, max_size_cm=...)` and
 `FiniteElementDiffusion(mesh.grid)`. Material derivatives work directly; shape
@@ -105,7 +105,7 @@ The tetrahedral mesh is fixed between remeshing steps. Current exact analytical
 cylinder intersections support disjoint or nested cylinders, including annuli.
 
 For an OpenMC-calibrated depletion study, use the
-[WR-1 case adapter](../wr_1/model/case.py) as the next example. It binds geometry,
+[WR-1 case adapter](../wr_1/model/case.py) for a coupled design. It binds geometry,
 a fresh isotope inventory, surrogate construction and fitting targets through
 [`CaseModel`](../../src/coupling/cases.py). `CycleCase` adds resolved
 scenario inputs and explicit output paths. The shared `prepare_case` and

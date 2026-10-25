@@ -163,10 +163,10 @@ def test_native_geometry_uses_declared_radial_and_axial_boundaries(tmp_path, ful
 
 def test_wr1_diffusion_mesh_inherits_native_physical_boundaries():
     """Keep native and surrogate boundaries aligned after a declared input change."""
-    from examples.wr_1.model.case import study
-    from examples.wr_1.model.case import make_case
+    from designs.wr_1.model.case import study
+    from designs.wr_1.model.case import make_case
     from geometry.diffusion import discretize
-    from examples.wr_1.build_geometry import parameterized_geometry
+    from designs.wr_1.build_geometry import parameterized_geometry
 
     case = study(1)
     settings = case.settings()

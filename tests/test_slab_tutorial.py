@@ -2,7 +2,7 @@
 import math
 import tomllib
 
-from examples.slab.run import INPUTS, run
+from designs.slab.run import INPUTS, run
 
 
 def test_tutorial_recovers_analytical_critical_width():

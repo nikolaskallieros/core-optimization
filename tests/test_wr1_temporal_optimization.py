@@ -1,12 +1,12 @@
 """Analytic temporal-moment and objective checks; no finite differences or transport."""
-from examples.wr_1 import WR1_ROOT
+from designs.wr_1 import WR1_ROOT
 from types import SimpleNamespace
 import unittest
 
 import numpy as np
 import torch
 
-from examples.wr_1.model.case import study
+from designs.wr_1.model.case import study
 from fuel_cycle.residence import FuelMap
 from coupling.optimization import (assess_native, design_loss,
                                              eol_check, eol_state_key, prediction_rank)

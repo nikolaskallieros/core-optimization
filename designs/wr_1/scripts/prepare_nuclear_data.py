@@ -1,5 +1,5 @@
 """Prepare the evaluated data selected by the WR-1 scenario."""
-from examples.wr_1.model.data import prepare
+from designs.wr_1.model.data import prepare
 
 
 if __name__ == "__main__":

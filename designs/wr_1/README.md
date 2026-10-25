@@ -1,6 +1,6 @@
-# WR-1 example
+# WR-1 design
 
-This example defines WR-1 geometry, material choices, operating scenarios and
+This design defines WR-1 geometry, material choices, operating scenarios and
 optimization goals. Native transport, inventory handling, cycle replay,
 calibration, optimization and plotting are provided by the packages in `src/`.
 The model declares channel locations and materials. A small geometry builder
@@ -30,7 +30,7 @@ at least 10 GiB free for preparation and scratch files. From the repository root
 after installing the project:
 
 ```sh
-.venv/bin/python -m examples.wr_1.scripts.prepare_nuclear_data
+.venv/bin/python -m designs.wr_1.scripts.prepare_nuclear_data
 ```
 
 Data go to `.cache/nuclear_data/`. To use another disk, set
@@ -52,9 +52,9 @@ The bundled depletion chain can also be unpacked on its own without a download:
 To prepare and run optimization step 1:
 
 ```sh
-.venv/bin/python -m examples.wr_1.scripts.prepare_step_1
-.venv/bin/python -m examples.wr_1.scripts.run_optimization
-.venv/bin/python -m examples.wr_1.scripts.plotting.render
+.venv/bin/python -m designs.wr_1.scripts.prepare_step_1
+.venv/bin/python -m designs.wr_1.scripts.run_optimization
+.venv/bin/python -m designs.wr_1.scripts.plotting.render
 ```
 
 Preparation checks the declared inputs and exports OpenMC XML under
@@ -116,7 +116,7 @@ boundary faces. Saved STEP inputs are fixed; optimization uses live parameters.
 To export just the CAD for inspection, set `STEP` in `build_geometry.py` and run:
 
 ```sh
-.venv/bin/python -m examples.wr_1.build_geometry
+.venv/bin/python -m designs.wr_1.build_geometry
 ```
 
 Preparation and calibration select the resulting `DiffusionGeometry` through
@@ -139,7 +139,7 @@ it can regenerate numerical plots. Small regression cases and their inputs live
 in `tests/fixtures/`.
 
 The two evaluated-data manifests retain source URLs and checksums. Processing
-engines live in `get_nuclear_data`; the example supplies its required materials,
+engines live in `get_nuclear_data`; the design supplies its required materials,
 temperatures and source selection. NJOY decks and processing receipts are
 generated under the ignored nuclear-data cache, rather than stored as inputs.
 The manifests remain JSON verification records and do not need routine editing.

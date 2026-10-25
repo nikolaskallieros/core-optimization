@@ -12,9 +12,9 @@ __pycache__/
 .DS_Store
 *.tmp
 
-# Retain figures; numerical example outputs stay local.
-/examples/*/results/**
-!/examples/*/results/**/
-!/examples/*/results/**/figures/*.png
-!/examples/*/results/**/figures/*.svg
-!/examples/*/results/**/figures/*.pdf
+# Retain figures; numerical design outputs stay local.
+/designs/*/results/**
+!/designs/*/results/**/
+!/designs/*/results/**/figures/*.png
+!/designs/*/results/**/figures/*.svg
+!/designs/*/results/**/figures/*.pdf

@@ -4,7 +4,7 @@ import numpy as np
 from runtime.paths import RUNS
 from optimization.design import set_parameters
 from plotting.case import render_case
-from examples.wr_1.model.case import study, new_run
+from designs.wr_1.model.case import study, new_run
 
 STEPS = (1, 2, 3, 4, 5, 6)
 USE_RETAINED_RESULTS = True

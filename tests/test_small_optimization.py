@@ -1,5 +1,5 @@
 from fixtures.small_case import study as small_study
-from examples.wr_1 import WR1_ROOT
+from designs.wr_1 import WR1_ROOT
 from copy import deepcopy
 import json
 from pathlib import Path

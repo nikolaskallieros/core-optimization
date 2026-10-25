@@ -1,11 +1,11 @@
 from fixtures.small_case import study as small_study
-from examples.wr_1 import WR1_ROOT
+from designs.wr_1 import WR1_ROOT
 from runtime.paths import RUNS
 
 import pytest
 import torch
 
-from examples.wr_1.model.case import study
+from designs.wr_1.model.case import study
 from optimization.design import parameters, set_parameters
 from coupling.optimization import project
 

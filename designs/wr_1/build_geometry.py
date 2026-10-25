@@ -41,7 +41,7 @@ def build_geometry(design, case):
 
     Parameters
     ----------
-    design : examples.wr_1.model.design.Design
+    design : designs.wr_1.model.design.Design
         Physical dimensions and design variables resolved from TOML.
     case : dict
         Ordered material identities and boundary choices.
@@ -56,7 +56,7 @@ def build_geometry(design, case):
 
 
 if __name__ == "__main__":
-    from examples.wr_1.model.case import study
+    from designs.wr_1.model.case import study
 
     scenario = study(STEP)
     build_geometry(scenario.design(), scenario.make_case()).write_step(scenario.work / "geometry.step")

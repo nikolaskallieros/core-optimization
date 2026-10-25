@@ -10,8 +10,8 @@ import torch
 from torch import nn
 
 from geometry.channels import ChannelDesign as WR1Design
-from examples.wr_1.model.case import study as wr1_study
-from examples.wr_1.model.materials import fuel_recipe
+from designs.wr_1.model.case import study as wr1_study
+from designs.wr_1.model.materials import fuel_recipe
 from coupling.cases import load_configuration
 from materials.composition import transport_atoms
 
@@ -236,7 +236,7 @@ def make_case(root, *, design_values=None, boron=None, sampling=None, fuel_state
                                  "represented_channels": sum(c["sector_fraction"] for c in spec["channels"])})
     case["material_response"]["region_indices"] = [i for i, r in enumerate(regions) if r["depletable"]]
     case["boron_response"]["region_indices"] = [i for i, r in enumerate(regions) if r.get("thermal_scattering")]
-    from examples.wr_1.build_geometry import parameterized_geometry as cad_geometry
+    from designs.wr_1.build_geometry import parameterized_geometry as cad_geometry
     case["cad_geometry"] = cad_geometry(design, case).record()
     return case
 
@@ -257,10 +257,10 @@ def study(root):
     from coupling.cases import CaseModel, CycleCase
     from runtime.paths import RUNS, NUCLEAR_DATA
     from materials.inventory import IsotopicInventory
-    from examples.wr_1.model.calibration import make_surrogate, equivalence_bases, fitting_targets
+    from designs.wr_1.model.calibration import make_surrogate, equivalence_bases, fitting_targets
     from geometry.diffusion import discretize
-    from examples.wr_1.build_geometry import parameterized_geometry
-    from examples.wr_1.model.materials import live_recipe, initialize_loading
+    from designs.wr_1.build_geometry import parameterized_geometry
+    from designs.wr_1.model.materials import live_recipe, initialize_loading
     root = Path(root)
     config = settings(root)
     work = RUNS / "small_cycle/channel_burnup"

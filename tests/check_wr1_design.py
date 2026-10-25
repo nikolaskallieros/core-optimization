@@ -5,7 +5,7 @@ import sys
 from runtime.paths import PROJECT_ROOT
 
 sys.path.insert(0, str(PROJECT_ROOT))
-from examples.wr_1 import WR1_ROOT as ROOT
+from designs.wr_1 import WR1_ROOT as ROOT
 RADIUS_CHECK_STEP_MM = 1.0
 
 
@@ -22,7 +22,7 @@ def design_check():
     from diffusion_surrogate import Grid3D, cylinder_regions
 
     sys.path.insert(0, str(PROJECT_ROOT))
-    from examples.wr_1.model.case import study
+    from designs.wr_1.model.case import study
 
     case = study(1, root=ROOT)
     design = case.design()
